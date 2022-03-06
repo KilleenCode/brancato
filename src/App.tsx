@@ -5,15 +5,15 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { app, dialog } from "@tauri-apps/api";
 import { DevTool } from "@hookform/devtools";
 import { useFieldArray, useForm } from "react-hook-form";
-import { register as registerShortcut } from "@tauri-apps/api/globalShortcut";
-import { getCurrent as getCurrentWindow } from "@tauri-apps/api/window";
+// import { register as registerShortcut } from "@tauri-apps/api/globalShortcut";
+// import { getCurrent as getCurrentWindow } from "@tauri-apps/api/window";
 
-let shortcut = "CmdOrControl+Space+D";
+// let shortcut = "CmdOrControl+Space+D";
 
-registerShortcut(shortcut, () => {
-  const currentWindow = getCurrentWindow();
-  currentWindow.show();
-});
+// registerShortcut(shortcut, () => {
+//   const currentWindow = getCurrentWindow();
+//   currentWindow.show();
+// });
 
 const MY_SITES = [
   "https://twitter.com",
@@ -95,6 +95,7 @@ function App() {
           <button type="button" onClick={addFilePath}>
             Add file/program
           </button>
+          <hr />
           <button type="submit">Run workflow</button>
         </form>
       </header>
