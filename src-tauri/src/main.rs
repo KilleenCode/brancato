@@ -3,19 +3,17 @@
   windows_subsystem = "windows"
 )]
 
-use std::env;
-use std::path::Path;
+mod config;
+mod workflows;
+
+use std::{env, path::Path, sync::Mutex};
 use tauri::Manager;
 use tauri::{
   AppHandle, CustomMenuItem, GlobalShortcutManager, RunEvent, SystemTray, SystemTrayEvent,
   SystemTrayMenu, SystemTrayMenuItem, Window,
 };
+use workflows::Workflow;
 extern crate open;
-
-struct Workflow {
-  name: String,
-  steps: Vec<String>,
-}
 
 // On Windows, some apps expect a relative working directory (Looking at you, OBS....)
 fn open_app(path: &str) {
@@ -27,20 +25,32 @@ fn open_app(path: &str) {
 }
 
 #[tauri::command]
-fn test_workflow(paths: Vec<String>) {
-  let settings = Workflow {
-    name: String::from("test workflow"),
-    steps: paths,
-  };
-
-  for p in settings.steps {
-    if p.contains("https") {
-      open::that_in_background(p);
-    } else {
-      open_app(&p);
-    }
-  }
+fn save_workflows(state: tauri::State<AppState>, config: config::Config) {
+  let mut app_state = state.0.lock().expect("Could not lock mutex");
+  let config_as_string = serde_json::to_string(&config).expect("couldnt serialize");
+  *app_state = config_as_string;
+  config::set_config(config);
 }
+
+#[derive(Default)]
+struct AppState(Mutex<String>);
+
+#[tauri::command]
+fn get_state(state: tauri::State<AppState>) -> String {
+  let mut config = state.0.lock().expect("Could not lock mutex");
+  String::from(&*config)
+}
+
+// #[tauri::command]
+// fn run_workflow(workflow: Workflow) {
+//   for p in workflow.steps {
+//     if p.contains("https") {
+//       open::that_in_background(p);
+//     } else {
+//       open_app(&p);
+//     }
+//   }
+// }
 
 fn get_settings_window(app: &AppHandle) -> Window {
   app.get_window("main").unwrap()
@@ -54,6 +64,8 @@ fn focus_settings(app: &AppHandle) {
 }
 
 fn main() {
+  let user_config = config::get_config();
+
   let quit = CustomMenuItem::new("quit".to_string(), "Quit");
   let hide = CustomMenuItem::new("hide".to_string(), "Hide");
   let tray_menu = SystemTrayMenu::new()
@@ -69,10 +81,6 @@ fn main() {
         size: _,
         ..
       } => {
-        // let window = app.get_window("main").unwrap();
-        // window.show().unwrap();
-        // window.unminimize().unwrap();
-        // window.set_focus().unwrap();
         focus_settings(app);
       }
       SystemTrayEvent::RightClick {
@@ -101,10 +109,12 @@ fn main() {
       },
       _ => {}
     })
-    .invoke_handler(tauri::generate_handler![test_workflow])
+    .manage(AppState(Mutex::new(
+      serde_json::to_string(&user_config).expect("couldnt serialize"),
+    )))
+    .invoke_handler(tauri::generate_handler![save_workflows, get_state])
     .build(tauri::generate_context!())
     .expect("error while running tauri application");
-
   app.run(|app_handle, e| match e {
     // Application is ready (triggered only once)
     RunEvent::Ready => {

@@ -39,6 +39,10 @@ div.inline-logo .smaller {
   color: white;
 }
 
+.App-header ul {
+  list-style: none;
+}
+
 .App-link {
   color: #61dafb;
   margin-bottom: 5vh;
