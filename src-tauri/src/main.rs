@@ -126,11 +126,12 @@ fn main() {
         let label = event.window().label();
         match label {
           "settings" => {}
-          _ => {
+          "omnibar" => {
             if !focused {
               event.window().hide();
             }
           }
+          _ => {}
         }
         // hide window whenever it loses focus
         // if !focused {
