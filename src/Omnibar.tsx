@@ -11,30 +11,35 @@ const Omnibar = () => {
     }
     setStoredConfigChoices();
   }, []);
+  const handleRunWorkflow = (label: string) => {
+    invoke("run_workflow", { label });
+  };
 
   return (
-    <div
-      style={{
-        height: "100%",
-        width: "100%",
-        background: "rgb(137 55 219 / 65%)",
-      }}
-    >
-      <form>
+    <div style={{ background: "rgb(0 0 0 / 0%)" }}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const formData = new FormData(e.currentTarget);
+          const label = formData.get("omnibar") as string | undefined;
+          label && handleRunWorkflow(label);
+          setValue("");
+        }}
+      >
         <input
+          name="omnibar"
+          id="omnibar"
+          className="omnibar"
+          type="search"
           value={value}
+          onChange={(e) => setValue(e.target.value)}
           list="workflows"
-          onChange={(e) => {
-            invoke("run_workflow", { label: e.target.value });
-            setValue("");
-          }}
         />
         <datalist id="workflows">
           {suggestions.map((name) => (
             <option value={name} />
           ))}
         </datalist>
-        <button>go!</button>
       </form>
     </div>
   );

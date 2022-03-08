@@ -133,10 +133,6 @@ fn main() {
           }
           _ => {}
         }
-        // hide window whenever it loses focus
-        // if !focused {
-        //   event.window().hide().unwrap();
-        // }
       }
       _ => {}
     })
@@ -167,13 +163,10 @@ fn main() {
 
     // // Triggered when a window is trying to close
     RunEvent::CloseRequested { label, api, .. } => {
-      println!("{}", label);
-      if &label == "settings" {
-        api.prevent_close();
-        let app_handle = app_handle.clone();
-        let window = app_handle.get_window(&label).unwrap();
-        app_handle.get_window(&label).unwrap().hide().unwrap();
-      }
+      api.prevent_close();
+      let app_handle = app_handle.clone();
+      let window = app_handle.get_window(&label).unwrap();
+      app_handle.get_window(&label).unwrap().hide().unwrap();
     }
 
     // Keep the event loop running even if all windows are closed

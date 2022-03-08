@@ -14,28 +14,31 @@ const WorkflowAction = ({ nestIndex, control, register }: Props) => {
   return (
     <div>
       {fields.map((item, k) => {
+        const fieldName = `workflows.${nestIndex}.steps.${k}.value`;
         return (
           <div key={item.id} style={{ marginLeft: 20 }}>
-            <label>File:</label>
+            <label htmlFor={item.id}>Path</label>
             <input
-              {...register(`workflows.${nestIndex}.steps.${k}.value`, {
+              id={item.id}
+              {...register(fieldName, {
                 required: true,
               })}
               style={{ marginRight: "25px" }}
             />
 
             <button type="button" onClick={() => remove(k)}>
-              Delete Nested
+              Delete
             </button>
           </div>
         );
       })}
 
       <button type="button" onClick={() => append({ value: "" })}>
-        Append Nested
+        Add Step
       </button>
-
-      <hr />
+      <button type="button" onClick={() => remove(nestIndex)}>
+        Delete Workflow
+      </button>
     </div>
   );
 };

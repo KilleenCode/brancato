@@ -13,13 +13,10 @@ export default function WorkflowArray({ control, register }: any) {
       <ul>
         {fields.map((item, index) => {
           return (
-            <li key={item.id}>
+            <li key={item.id} className="workflow">
               <label>Name</label>
               <input {...register(`workflows.${index}.name`)} />
 
-              <button type="button" onClick={() => remove(index)}>
-                Delete
-              </button>
               <WorkflowAction nestIndex={index} {...{ control, register }} />
             </li>
           );
@@ -33,7 +30,7 @@ export default function WorkflowArray({ control, register }: any) {
             append(defaultWorkflow);
           }}
         >
-          append
+          Add Workflow
         </button>
       </section>
     </>

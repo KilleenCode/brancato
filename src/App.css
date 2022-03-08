@@ -1,15 +1,14 @@
 html {
   box-sizing: border-box;
 }
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
 }
 
-
 .App {
-  text-align: center;
 }
 
 .App-logo {
@@ -53,6 +52,11 @@ div.inline-logo .smaller {
   list-style: none;
 }
 
+.App-header label {
+  font-size: 1rem;
+  margin-right: 6px;
+}
+
 .App-link {
   color: #61dafb;
   margin-bottom: 5vh;
@@ -65,4 +69,32 @@ div.inline-logo .smaller {
   to {
     transform: rotate(360deg);
   }
+}
+
+.workflow {
+  padding: 1rem;
+  border-bottom: 1px solid white;
+}
+
+#root {
+  background-color: rgba(0, 0, 0, 0);
+}
+
+.omnibar {
+  font-size: 4rem;
+  padding: 1rem;
+  width: 600px;
+  color: white;
+  background: rgba(31, 37, 70, 0.9);
+  border-radius: 8px;
+  border: 0;
+}
+
+[list]::-webkit-calendar-picker-indicator,
+[list]:hover::-webkit-calendar-picker-indicator {
+  opacity: 0;
+}
+
+[list]::-webkit-calendar-picker-indicator {
+  display: none;
 }
