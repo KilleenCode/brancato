@@ -31,7 +31,7 @@ const WorkflowAction = ({ nestIndex, control, register }: Props) => {
         );
       })}
 
-      <button type="button" onClick={() => append("")}>
+      <button type="button" onClick={() => append({ value: "" })}>
         Append Nested
       </button>
 

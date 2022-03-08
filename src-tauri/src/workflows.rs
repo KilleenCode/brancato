@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Step {
-  value: String,
+  pub value: String,
 }
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Workflow {

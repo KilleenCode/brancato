@@ -7,10 +7,9 @@ mod config;
 mod workflows;
 
 use std::{env, path::Path, sync::Mutex};
-use tauri::Manager;
 use tauri::{
-  AppHandle, CustomMenuItem, GlobalShortcutManager, RunEvent, SystemTray, SystemTrayEvent,
-  SystemTrayMenu, SystemTrayMenuItem, Window,
+  AppHandle, CustomMenuItem, GlobalShortcutManager, Manager, RunEvent, SystemTray, SystemTrayEvent,
+  SystemTrayMenu, SystemTrayMenuItem, Window, WindowBuilder, WindowEvent,
 };
 use workflows::Workflow;
 extern crate open;
@@ -36,28 +35,38 @@ fn save_workflows(state: tauri::State<AppState>, config: config::Config) {
 struct AppState(Mutex<String>);
 
 #[tauri::command]
-fn get_state(state: tauri::State<AppState>) -> String {
+fn get_state(state: tauri::State<AppState>) -> config::Config {
   let mut config = state.0.lock().expect("Could not lock mutex");
-  String::from(&*config)
+  let hmm: config::Config = serde_json::from_str(&*config).expect("Couldn't convert state");
+  hmm
 }
 
-// #[tauri::command]
-// fn run_workflow(workflow: Workflow) {
-//   for p in workflow.steps {
-//     if p.contains("https") {
-//       open::that_in_background(p);
-//     } else {
-//       open_app(&p);
-//     }
-//   }
-// }
+#[tauri::command]
+fn run_workflow(state: tauri::State<AppState>, label: String) {
+  let current_state = get_state(state);
 
-fn get_settings_window(app: &AppHandle) -> Window {
-  app.get_window("main").unwrap()
+  let workflow = current_state
+    .workflows
+    .iter()
+    .find(|x| x.name == label)
+    .unwrap();
+
+  let steps = &workflow.steps;
+
+  dbg!(steps);
+  for p in &workflow.steps {
+    if p.value.contains("https") {
+      open::that_in_background(&p.value);
+    } else {
+      open_app(&p.value);
+    }
+  }
 }
 
-fn focus_settings(app: &AppHandle) {
-  let window = get_settings_window(app);
+fn hide_window(app: &AppHandle, label: String) {}
+
+fn focus_window(app: &AppHandle, label: String) {
+  let window = app.get_window(&label).unwrap();
   window.show().unwrap();
   window.unminimize().unwrap();
   window.set_focus().unwrap();
@@ -66,10 +75,13 @@ fn focus_settings(app: &AppHandle) {
 fn main() {
   let user_config = config::get_config();
 
-  let quit = CustomMenuItem::new("quit".to_string(), "Quit");
-  let hide = CustomMenuItem::new("hide".to_string(), "Hide");
+  let quit = CustomMenuItem::new("quit", "Quit");
+  let hide = CustomMenuItem::new("hide", "Hide");
+  let settings = CustomMenuItem::new("settings", "Settings");
   let tray_menu = SystemTrayMenu::new()
     .add_item(quit)
+    .add_native_item(SystemTrayMenuItem::Separator)
+    .add_item(settings)
     .add_native_item(SystemTrayMenuItem::Separator)
     .add_item(hide);
   let system_tray = SystemTray::new().with_menu(tray_menu);
@@ -81,7 +93,7 @@ fn main() {
         size: _,
         ..
       } => {
-        focus_settings(app);
+        focus_window(app, "settings".to_owned());
       }
       SystemTrayEvent::RightClick {
         position: _,
@@ -101,20 +113,43 @@ fn main() {
         "quit" => {
           std::process::exit(0);
         }
+        "settings" => focus_window(app, "settings".to_owned()),
         "hide" => {
-          let window = get_settings_window(app);
-          window.hide().unwrap();
+          app.get_window("settings").unwrap().hide().unwrap();
         }
         _ => {}
       },
       _ => {}
     })
+    .on_window_event(|event| match event.event() {
+      tauri::WindowEvent::Focused(focused) => {
+        let label = event.window().label();
+        match label {
+          "settings" => {}
+          _ => {
+            if !focused {
+              event.window().hide();
+            }
+          }
+        }
+        // hide window whenever it loses focus
+        // if !focused {
+        //   event.window().hide().unwrap();
+        // }
+      }
+      _ => {}
+    })
     .manage(AppState(Mutex::new(
       serde_json::to_string(&user_config).expect("couldnt serialize"),
     )))
-    .invoke_handler(tauri::generate_handler![save_workflows, get_state])
+    .invoke_handler(tauri::generate_handler![
+      get_state,
+      save_workflows,
+      run_workflow
+    ])
     .build(tauri::generate_context!())
     .expect("error while running tauri application");
+
   app.run(|app_handle, e| match e {
     // Application is ready (triggered only once)
     RunEvent::Ready => {
@@ -123,33 +158,22 @@ fn main() {
         .global_shortcut_manager()
         .register("Alt+Space", move || {
           let app_handle = app_handle.clone();
-          focus_settings(&app_handle);
-          println!("Shortcut fired");
+          focus_window(&app_handle, "omnibar".to_owned());
+          println!("Alt+Space fired");
         })
         .unwrap();
     }
 
     // // Triggered when a window is trying to close
-    // RunEvent::CloseRequested { label, api, .. } => {
-    //   let app_handle = app_handle.clone();
-    //   let window = app_handle.get_window(&label).unwrap();
-    //   // use the exposed close api, and prevent the event loop to close
-    //   api.prevent_close();
-    //   // ask the user if he wants to quit
-    //   ask(
-    //     Some(&window),
-    //     "Tauri API",
-    //     "Are you sure that you want to close this window?",
-    //     move |answer| {
-    //       if answer {
-    //         // .close() cannot be called on the main thread
-    //         std::thread::spawn(move || {
-    //           app_handle.get_window(&label).unwrap().close().unwrap();
-    //         });
-    //       }
-    //     },
-    //   );
-    // }
+    RunEvent::CloseRequested { label, api, .. } => {
+      println!("{}", label);
+      if &label == "settings" {
+        api.prevent_close();
+        let app_handle = app_handle.clone();
+        let window = app_handle.get_window(&label).unwrap();
+        app_handle.get_window(&label).unwrap().hide().unwrap();
+      }
+    }
 
     // Keep the event loop running even if all windows are closed
     // This allow us to catch system tray events when there is no window

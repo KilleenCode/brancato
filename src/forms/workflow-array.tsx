@@ -1,5 +1,5 @@
 import { useFieldArray } from "react-hook-form";
-import { defaultWorkflow } from "../App";
+import { defaultWorkflow } from "../Config";
 import WorkflowAction from "./workflow-action";
 
 export default function WorkflowArray({ control, register }: any) {

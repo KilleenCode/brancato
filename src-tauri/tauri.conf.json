@@ -59,10 +59,21 @@
     "windows": [
       {
         "title": "Brancato Workflow",
-        "width": 800,
-        "height": 600,
-        "resizable": true,
-        "fullscreen": false
+        "label": "omnibar",
+        "width": 600,
+        "height": 200,
+        "center": true,
+        "resizable": false,
+        "fullscreen": false,
+        "url": "/",
+        "decorations": false,
+        "transparent": true
+      },
+      {
+        "label": "settings",
+        "url": "/settings",
+        "visible": false,
+        "focus": false
       }
     ],
     "security": {
