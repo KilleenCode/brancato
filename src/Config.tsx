@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import { invoke } from "@tauri-apps/api/tauri";
 import { dialog } from "@tauri-apps/api";
@@ -22,12 +22,12 @@ export const defaultWorkflow = {
   name: "",
   steps: [{ value: "" }],
 };
-const defaultValues = {
-  workflows: [defaultWorkflow],
-};
+
 function Config() {
   // const [pathFromFile, setPathFromFile] = useState<string | undefined>();
-
+  const [defaultValues, setDefaultValues] = useState<Workflows>({
+    workflows: [defaultWorkflow],
+  });
   const { control, register, handleSubmit, getValues, setValue, reset } =
     useForm<Workflows>({
       defaultValues,
@@ -37,13 +37,16 @@ function Config() {
     invoke("save_workflows", { config: data });
   };
   useEffect(() => {
+    reset(defaultValues);
+  }, [defaultValues, reset]);
+
+  useEffect(() => {
     async function setStoredConfigAsDefaults() {
       let state = await getConfig();
-      console.log({ defaultValues, state });
-      reset(state);
+      setDefaultValues(state);
     }
     setStoredConfigAsDefaults();
-  }, [reset]);
+  }, []);
 
   // const addFilePath = () => {
   //   dialog.open({ multiple: false }).then((data) => {
