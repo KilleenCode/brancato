@@ -17,7 +17,11 @@ export default function WorkflowArray({ control, register }: any) {
               <label>Name</label>
               <input {...register(`workflows.${index}.name`)} />
 
-              <WorkflowAction nestIndex={index} {...{ control, register }} />
+              <WorkflowAction
+                nestIndex={index}
+                {...{ control, register }}
+                nestedRemove={remove}
+              />
             </li>
           );
         })}

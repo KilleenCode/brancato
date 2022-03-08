@@ -19,7 +19,7 @@ fn open_app(path: &str) {
   let path = Path::new(&path);
   println!("{}", path.display());
   let dir = path.parent().expect("Path doesn't exist");
-  env::set_current_dir(dir);
+  env::set_current_dir(dir).expect("Couldn't set current dir");
   open::that(path).expect("Dang")
 }
 
@@ -126,7 +126,7 @@ fn main() {
           "settings" => {}
           "omnibar" => {
             if !focused {
-              event.window().hide();
+              event.window().hide().expect("Failed to hide window");
             }
           }
           _ => {}

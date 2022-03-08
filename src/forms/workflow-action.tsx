@@ -1,11 +1,17 @@
-import { useFieldArray } from "react-hook-form";
+import { useFieldArray, UseFieldArrayRemove } from "react-hook-form";
 import type { useForm } from "react-hook-form";
 
 type Props = {
   nestIndex: number;
+  nestedRemove: UseFieldArrayRemove;
 } & Pick<ReturnType<typeof useForm>, "control" | "register">;
 
-const WorkflowAction = ({ nestIndex, control, register }: Props) => {
+const WorkflowAction = ({
+  nestIndex,
+  control,
+  register,
+  nestedRemove,
+}: Props) => {
   const { fields, remove, append } = useFieldArray({
     control,
     name: `workflows.${nestIndex}.steps`,
@@ -36,7 +42,7 @@ const WorkflowAction = ({ nestIndex, control, register }: Props) => {
       <button type="button" onClick={() => append({ value: "" })}>
         Add Step
       </button>
-      <button type="button" onClick={() => remove(nestIndex)}>
+      <button type="button" onClick={() => nestedRemove(nestIndex)}>
         Delete Workflow
       </button>
     </div>
