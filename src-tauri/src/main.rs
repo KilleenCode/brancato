@@ -9,9 +9,9 @@ mod workflows;
 use std::{env, path::Path, sync::Mutex};
 use tauri::{
   AppHandle, CustomMenuItem, GlobalShortcutManager, Manager, RunEvent, SystemTray, SystemTrayEvent,
-  SystemTrayMenu, SystemTrayMenuItem, Window, WindowBuilder, WindowEvent,
+  SystemTrayMenu, SystemTrayMenuItem,
 };
-use workflows::Workflow;
+
 extern crate open;
 
 // On Windows, some apps expect a relative working directory (Looking at you, OBS....)
@@ -36,7 +36,7 @@ struct AppState(Mutex<String>);
 
 #[tauri::command]
 fn get_state(state: tauri::State<AppState>) -> config::Config {
-  let mut config = state.0.lock().expect("Could not lock mutex");
+  let config = state.0.lock().expect("Could not lock mutex");
   let hmm: config::Config = serde_json::from_str(&*config).expect("Couldn't convert state");
   hmm
 }
@@ -62,8 +62,6 @@ fn run_workflow(state: tauri::State<AppState>, label: String) {
     }
   }
 }
-
-fn hide_window(app: &AppHandle, label: String) {}
 
 fn focus_window(app: &AppHandle, label: String) {
   let window = app.get_window(&label).unwrap();
@@ -165,7 +163,6 @@ fn main() {
     RunEvent::CloseRequested { label, api, .. } => {
       api.prevent_close();
       let app_handle = app_handle.clone();
-      let window = app_handle.get_window(&label).unwrap();
       app_handle.get_window(&label).unwrap().hide().unwrap();
     }
 
