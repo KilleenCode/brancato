@@ -81,13 +81,18 @@ div.inline-logo .smaller {
 }
 
 .omnibar {
-  font-size: 4rem;
+  font-size: 2.5rem;
   padding: 1rem;
   width: 600px;
   color: white;
-  background: rgba(31, 37, 70, 0.9);
+  background: rgba(31, 37, 70, 0.95);
   border-radius: 8px;
   border: 0;
+}
+
+.omnibar:focus {
+  border: 0;
+  outline: none;
 }
 
 [list]::-webkit-calendar-picker-indicator,
@@ -97,4 +102,16 @@ div.inline-logo .smaller {
 
 [list]::-webkit-calendar-picker-indicator {
   display: none;
+}
+
+/* ------ Algolia --------- */
+.aa-ItemContentTitleNote {
+  margin-left: 0.5rem;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  color: black;
+  background: #efefef;
+  padding: 0.2rem 0.4rem 0.1rem;
+  border-radius: 0.2rem;
+  border: 1px solid #dedede;
 }
