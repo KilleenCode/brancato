@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import { invoke } from "@tauri-apps/api/tauri";
-// import { dialog } from "@tauri-apps/api";
 import { DevTool } from "@hookform/devtools";
 import { useForm } from "react-hook-form";
 import WorkflowArray from "./forms/workflow-array";
