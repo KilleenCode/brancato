@@ -39,7 +39,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "159bb86af3a200e19a068f4224eae4c8bb2d0fa054c7e5d1cacd5cef95e684cd"
 
 [[package]]
-name = "app"
+name = "brancato"
 version = "1.0.0-beta.0"
 dependencies = [
  "directories",
