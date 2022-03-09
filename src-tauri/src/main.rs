@@ -24,11 +24,16 @@ fn open_app(path: &str) {
 }
 
 #[tauri::command]
-fn save_workflows(state: tauri::State<AppState>, config: config::Config) {
+fn save_workflows(state: tauri::State<AppState>, app: tauri::AppHandle, config: config::Config) {
   let mut app_state = state.0.lock().expect("Could not lock mutex");
   let config_as_string = serde_json::to_string(&config).expect("couldnt serialize");
+
+  // Update state
   *app_state = config_as_string;
+  // Save to file
   config::set_config(config);
+  // Instruct client
+  app.get_window("omnibar").unwrap().emit("state-updated", "");
 }
 
 #[derive(Default)]

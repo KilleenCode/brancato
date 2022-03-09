@@ -4,24 +4,38 @@ import { useEffect, useState } from "react";
 import { Action, Autocomplete } from "./components/Autocomplete";
 import { getConfig } from "./utils";
 
+enum AppEvents {
+  OmnibarFocused = "omnibar-focus",
+  AppStateUpdated = "state-updated",
+}
+
 const focusSearchBar = () => {
   let input = document.querySelector(".aa-Input") as HTMLElement | null;
   input?.focus();
 };
 const Omnibar = () => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  async function setStoredConfigChoices() {
+    let state = await getConfig();
+    setSuggestions(state.workflows.map((wf) => wf.name));
+  }
   useEffect(() => {
-    const unlisten = appWindow.listen("omnibar-focus", focusSearchBar);
+    const unlisten1 = appWindow.listen(
+      AppEvents.OmnibarFocused,
+      focusSearchBar
+    );
+    const unlisten2 = appWindow.listen(
+      AppEvents.AppStateUpdated,
+      setStoredConfigChoices
+    );
 
     return () => {
-      unlisten();
+      unlisten1();
+      unlisten2();
     };
   }, []);
+
   useEffect(() => {
-    async function setStoredConfigChoices() {
-      let state = await getConfig();
-      setSuggestions(state.workflows.map((wf) => wf.name));
-    }
     setStoredConfigChoices();
   }, []);
 
