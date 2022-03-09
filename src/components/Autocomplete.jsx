@@ -42,6 +42,7 @@ export function Autocomplete(props) {
     }
 
     const search = autocomplete({
+      detachedMediaQuery: 'none',
       container: containerRef.current,
       renderer: { createElement, Fragment },
       render({ children }, root) {

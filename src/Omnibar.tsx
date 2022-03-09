@@ -1,11 +1,23 @@
 import { invoke } from "@tauri-apps/api/tauri";
+import { appWindow } from "@tauri-apps/api/window";
 import { useEffect, useState } from "react";
 import { Action, Autocomplete } from "./components/Autocomplete";
 import { getConfig } from "./utils";
 
+const focusSearchBar = () => {
+  let input = document.querySelector(".aa-Input") as HTMLElement | null;
+  console.log(input);
+  input?.focus();
+};
 const Omnibar = () => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  useEffect(() => {
+    const unlisten = appWindow.listen("omnibar-focus", focusSearchBar);
 
+    return () => {
+      unlisten();
+    };
+  }, []);
   useEffect(() => {
     async function setStoredConfigChoices() {
       let state = await getConfig();

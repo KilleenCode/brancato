@@ -51,8 +51,6 @@ fn run_workflow(state: tauri::State<AppState>, label: String) {
     .find(|x| x.name == label)
     .unwrap();
 
-  let steps = &workflow.steps;
-
   for p in &workflow.steps {
     if p.value.contains("https") {
       open::that_in_background(&p.value);
@@ -152,8 +150,9 @@ fn main() {
         .global_shortcut_manager()
         .register("Alt+Space", move || {
           let app_handle = app_handle.clone();
+          let label = "omnibar".to_owned();
           focus_window(&app_handle, "omnibar".to_owned());
-          println!("Alt+Space fired");
+          app_handle.get_window(&label).unwrap().emit("omnibar-focus", "");
         })
         .unwrap();
     }
