@@ -61,7 +61,7 @@
         "title": "Brancato Workflow",
         "label": "omnibar",
         "width": 600,
-        "height": 200,
+        "height": 400,
         "center": true,
         "resizable": false,
         "fullscreen": false,

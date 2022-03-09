@@ -6,7 +6,6 @@ import { getConfig } from "./utils";
 
 const focusSearchBar = () => {
   let input = document.querySelector(".aa-Input") as HTMLElement | null;
-  console.log(input);
   input?.focus();
 };
 const Omnibar = () => {
@@ -25,7 +24,8 @@ const Omnibar = () => {
     }
     setStoredConfigChoices();
   }, []);
-  const handleRunWorkflow = (label: string) => {
+
+  const handleRunWorkflow = async (label: string) => {
     invoke("run_workflow", { label });
   };
 
@@ -39,7 +39,7 @@ const Omnibar = () => {
           defaultActiveItemId={0}
           getSources={({ query }: { query: any }) => [
             {
-              sourceId: "actions",
+              sourceId: "workflows",
               getItemInputValue({ item }: { item: any }) {
                 return item.label;
               },
@@ -61,7 +61,33 @@ const Omnibar = () => {
                   return <h2>Workflows</h2>;
                 },
                 item({ item }: { item: any }) {
-                  console.log({ item });
+                  return <Action hit={item} />;
+                },
+              },
+            },
+            {
+              sourceId: "settings",
+              getItemInputValue({ item }: { item: any }) {
+                return item.label;
+              },
+              getItems({ state }: { state: any }) {
+                return [{ label: "Settings", action: "open_settings" }];
+              },
+              // Run this code when item is selected
+              onSelect(params: any) {
+                // item is the full item data
+                // setQuery is a hook to set the query state
+                const { item, setQuery } = params;
+
+                invoke(item.action);
+                setQuery("");
+              },
+              // Templates for Header of this source and Items in this source
+              templates: {
+                header() {
+                  return <h2>Settings</h2>;
+                },
+                item({ item }: { item: any }) {
                   return <Action hit={item} />;
                 },
               },

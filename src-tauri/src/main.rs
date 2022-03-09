@@ -34,16 +34,21 @@ fn save_workflows(state: tauri::State<AppState>, config: config::Config) {
 #[derive(Default)]
 struct AppState(Mutex<String>);
 
-#[tauri::command]
-fn get_state(state: tauri::State<AppState>) -> config::Config {
-  let config = state.0.lock().expect("Could not lock mutex");
-  let hmm: config::Config = serde_json::from_str(&*config).expect("Couldn't convert state");
-  hmm
+fn _get_state(state: tauri::State<AppState>) -> config::Config {
+  let config_mutex = state.0.lock().expect("Could not lock mutex");
+  let config: config::Config =
+    serde_json::from_str(&*config_mutex).expect("Couldn't convert state");
+  config
 }
 
 #[tauri::command]
-fn run_workflow(state: tauri::State<AppState>, label: String) {
-  let current_state = get_state(state);
+fn get_state(state: tauri::State<AppState>) -> config::Config {
+  _get_state(state)
+}
+
+#[tauri::command]
+async fn run_workflow(state: tauri::State<'_, AppState>, label: String) -> Result<(), ()> {
+  let current_state = _get_state(state);
 
   let workflow = current_state
     .workflows
@@ -58,13 +63,19 @@ fn run_workflow(state: tauri::State<AppState>, label: String) {
       open_app(&p.value);
     }
   }
+  Ok(())
+}
+
+#[tauri::command]
+async fn open_settings(app: tauri::AppHandle) {
+  focus_window(&app, "settings".to_owned());
 }
 
 fn focus_window(app: &AppHandle, label: String) {
   let window = app.get_window(&label).unwrap();
-  window.show().unwrap();
-  window.unminimize().unwrap();
-  window.set_focus().unwrap();
+  window.show();
+  window.unminimize();
+  window.set_focus();
 }
 
 fn main() {
@@ -137,7 +148,8 @@ fn main() {
     .invoke_handler(tauri::generate_handler![
       get_state,
       save_workflows,
-      run_workflow
+      run_workflow,
+      open_settings
     ])
     .build(tauri::generate_context!())
     .expect("error while running tauri application");
@@ -148,13 +160,16 @@ fn main() {
       let app_handle = app_handle.clone();
       app_handle
         .global_shortcut_manager()
-        .register("Alt+Space", move || {
+        .register("Alt+m", move || {
           let app_handle = app_handle.clone();
           let label = "omnibar".to_owned();
           focus_window(&app_handle, "omnibar".to_owned());
-          app_handle.get_window(&label).unwrap().emit("omnibar-focus", "");
+          app_handle
+            .get_window(&label)
+            .unwrap()
+            .emit("omnibar-focus", "");
         })
-        .unwrap();
+        .expect("Couldn't create shortcut");
     }
 
     // // Triggered when a window is trying to close
