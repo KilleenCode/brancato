@@ -5,7 +5,7 @@ description = "A Tauri App"
 authors = ["you"]
 license = ""
 repository = ""
-default-run = "app"
+default-run = "brancato"
 edition = "2021"
 rust-version = "1.57"
 
