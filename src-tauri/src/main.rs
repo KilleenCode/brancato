@@ -53,7 +53,6 @@ fn run_workflow(state: tauri::State<AppState>, label: String) {
 
   let steps = &workflow.steps;
 
-  dbg!(steps);
   for p in &workflow.steps {
     if p.value.contains("https") {
       open::that_in_background(&p.value);
