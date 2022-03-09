@@ -1,8 +1,8 @@
 [package]
 name = "brancato"
 version = "0.1.1"
-description = "A Tauri App"
-authors = ["you"]
+description = "A tool for stage-managing your life"
+authors = ["Ryan Killeen"]
 license = ""
 repository = ""
 default-run = "brancato"
