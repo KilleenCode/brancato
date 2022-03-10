@@ -4,37 +4,18 @@
 )]
 
 mod config;
+mod windows;
 mod workflows;
 
-use std::{env, path::Path, sync::Mutex};
+use std::{env, sync::Mutex};
 use tauri::{
   AppHandle, CustomMenuItem, GlobalShortcutManager, Manager, RunEvent, State, SystemTray,
   SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
 };
 
 use config::Config;
-
-extern crate open;
-
-// On Windows, some apps expect a relative working directory (Looking at you, OBS....)
-fn open_app(path: &str) {
-  let path = Path::new(&path);
-  println!("{}", path.display());
-  let dir = path.parent().expect("Path doesn't exist");
-  env::set_current_dir(dir).expect("Couldn't set current dir");
-  open::that(path).expect("Dang")
-}
-
-#[tauri::command]
-fn save_workflows(state: State<AppState>, app: AppHandle, config: Config) {
-  let mut app_state = state.0.lock().expect("Could not lock mutex");
-  // Save to file
-  config::set_config(&config);
-  // Update state
-  *app_state = config;
-  // Instruct client
-  app.get_window("omnibar").unwrap().emit("state-updated", "");
-}
+use windows::focus_window;
+use workflows::run_step;
 
 #[derive(Default)]
 struct AppState(Mutex<Config>);
@@ -46,6 +27,25 @@ fn _get_state(state: State<AppState>) -> Config {
 }
 
 #[tauri::command]
+fn save_workflows(
+  state: State<AppState>,
+  app: AppHandle,
+  config: Config,
+) -> Result<(), tauri::Error> {
+  let mut app_state = state.0.lock().expect("Could not lock mutex");
+  // Save to file
+  config::set_config(&config);
+  // Update state
+  *app_state = config;
+  // Instruct client
+  app
+    .get_window("omnibar")
+    .unwrap()
+    .emit("state-updated", "")?;
+  Ok(())
+}
+
+#[tauri::command]
 fn get_state(state: State<AppState>) -> Config {
   _get_state(state)
 }
@@ -54,34 +54,33 @@ fn get_state(state: State<AppState>) -> Config {
 async fn run_workflow(state: State<'_, AppState>, label: String) -> Result<(), ()> {
   let current_state = _get_state(state);
 
-  let workflow = current_state
+  let mut workflow = current_state
     .workflows
-    .iter()
+    .into_iter()
     .find(|x| x.name == label)
-    .unwrap();
+    .expect("Couldn't find workflow");
 
-  for p in &workflow.steps {
-    if p.value.contains("https") {
-      open::that_in_background(&p.value);
-    } else {
-      open_app(&p.value);
-    }
-  }
+  let _ = &workflow
+    .steps
+    .iter_mut()
+    .for_each(|step| run_step(&step.value));
+
   Ok(())
 }
 
 #[tauri::command]
-async fn open_settings(app: AppHandle) {
-  focus_window(&app, "settings".to_owned());
+async fn open_settings(app: AppHandle) -> Result<(), tauri::Error> {
+  focus_window(&app, "settings".to_owned())?;
+  Ok(())
 }
 
-fn focus_window(app: &AppHandle, label: String) {
-  let window = app.get_window(&label).unwrap();
-  window.show();
-  window.unminimize();
-  window.set_focus();
-}
+fn open_omnibar(app: &AppHandle) -> Result<(), tauri::Error> {
+  let label = "omnibar".to_owned();
+  focus_window(app, String::from(&label))?;
+  app.get_window(&label).unwrap().emit("omnibar-focus", "")?;
 
+  Ok(())
+}
 fn main() {
   let user_config = config::get_config();
 
@@ -103,27 +102,16 @@ fn main() {
         size: _,
         ..
       } => {
-        focus_window(app, "settings".to_owned());
+        focus_window(app, "settings".to_owned()).ok();
       }
-      SystemTrayEvent::RightClick {
-        position: _,
-        size: _,
-        ..
-      } => {
-        println!("system tray received a right click");
-      }
-      SystemTrayEvent::DoubleClick {
-        position: _,
-        size: _,
-        ..
-      } => {
-        println!("system tray received a double click");
-      }
+
       SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
         "quit" => {
           std::process::exit(0);
         }
-        "settings" => focus_window(app, "settings".to_owned()),
+        "settings" => {
+          focus_window(app, "settings".to_owned()).ok();
+        }
         "hide" => {
           app.get_window("settings").unwrap().hide().unwrap();
         }
@@ -132,18 +120,15 @@ fn main() {
       _ => {}
     })
     .on_window_event(|event| match event.event() {
-      tauri::WindowEvent::Focused(focused) => {
-        let label = event.window().label();
-        match label {
-          "settings" => {}
-          "omnibar" => {
-            if !focused {
-              event.window().hide().expect("Failed to hide window");
-            }
+      tauri::WindowEvent::Focused(focused) => match event.window().label() {
+        "settings" => {}
+        "omnibar" => {
+          if !focused {
+            event.window().hide().expect("Failed to hide window");
           }
-          _ => {}
         }
-      }
+        _ => {}
+      },
       _ => {}
     })
     .manage(AppState(Mutex::new(user_config)))
@@ -163,13 +148,7 @@ fn main() {
       app_handle
         .global_shortcut_manager()
         .register("Alt+m", move || {
-          let app_handle = app_handle.clone();
-          let label = "omnibar".to_owned();
-          focus_window(&app_handle, "omnibar".to_owned());
-          app_handle
-            .get_window(&label)
-            .unwrap()
-            .emit("omnibar-focus", "");
+          open_omnibar(&app_handle).ok();
         })
         .expect("Couldn't create shortcut");
     }
@@ -177,8 +156,7 @@ fn main() {
     // // Triggered when a window is trying to close
     RunEvent::CloseRequested { label, api, .. } => {
       api.prevent_close();
-      let app_handle = app_handle.clone();
-      app_handle.get_window(&label).unwrap().hide().unwrap();
+      let _ = &app_handle.get_window(&label).unwrap().hide().unwrap();
     }
 
     // Keep the event loop running even if all windows are closed
