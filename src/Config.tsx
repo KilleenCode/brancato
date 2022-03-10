@@ -142,12 +142,7 @@ function Config() {
           </Tabs.Content>
           <Tabs.Content value={TabSections.Preferences}>
             {" "}
-            {appConfig && (
-              <Shortcut
-                onUpdate={handleSubmit(onSubmit)}
-                currentShortcut={appConfig.shortcut}
-              />
-            )}
+            {appConfig && <Shortcut currentShortcut={appConfig.shortcut} />}
           </Tabs.Content>
         </Tabs.Root>
       </header>

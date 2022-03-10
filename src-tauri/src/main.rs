@@ -34,6 +34,7 @@ fn update_config_and_state(
   let mut app_state = state.0.lock().expect("Could not lock mutex");
   config::set_config(&new_config);
   *app_state = new_config;
+
   app
     .get_window("omnibar")
     .unwrap()

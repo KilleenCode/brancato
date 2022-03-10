@@ -4,13 +4,7 @@ import keycode from "keycode";
 import { useEffect, useState } from "react";
 import { Commands } from "../utils";
 
-const Shortcut = ({
-  currentShortcut,
-  onUpdate,
-}: {
-  currentShortcut: string;
-  onUpdate: () => void;
-}) => {
+const Shortcut = ({ currentShortcut }: { currentShortcut: string }) => {
   const [shortcut, setShortcut] = useState(currentShortcut);
   const [editingShortcut, setEditingShortcut] = useState(false);
   const [listenForKeys, setListenForKeys] = useState(false);
@@ -38,7 +32,6 @@ const Shortcut = ({
     setListenForKeys(!listenForKeys);
     setEditingShortcut(false);
     invoke(Commands.SetShortcut, { shortcut });
-    onUpdate();
   };
   return (
     <div>
