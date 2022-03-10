@@ -4,7 +4,8 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { DevTool } from "@hookform/devtools";
 import { useForm } from "react-hook-form";
 import WorkflowArray from "./forms/workflow-array";
-import { getConfig } from "./utils";
+import { Commands, getConfig } from "./utils";
+import Shortcut from "./components/Shortcut";
 
 export type Workflow = {
   name: string;
@@ -15,35 +16,40 @@ export type Workflow = {
 
 export type Workflows = {
   workflows: Workflow[];
+  shortcut: string;
 };
 
 export const defaultWorkflow = {
   name: "",
   steps: [{ value: "" }],
 };
+export async function getConfigAndSet(setData: (state: Workflows) => void) {
+  let state = await getConfig();
+  setData(state);
+}
 
 function Config() {
   // const [pathFromFile, setPathFromFile] = useState<string | undefined>();
-  const [defaultValues, setDefaultValues] = useState<Workflows>({
-    workflows: [defaultWorkflow],
-  });
+  const [appConfig, setAppConfig] = useState<Workflows | undefined>();
+  const [defaultValues, setDefaultValues] = useState<Workflows | undefined>();
   const { control, register, handleSubmit, getValues, setValue, reset } =
     useForm<Workflows>({
       defaultValues,
     });
 
   const onSubmit = (data: Workflows) => {
-    invoke("save_workflows", { config: data });
+    invoke(Commands.SaveWorkflows, { config: data });
   };
+
   useEffect(() => {
     reset(defaultValues);
   }, [defaultValues, reset]);
 
   useEffect(() => {
-    async function setStoredConfigAsDefaults() {
-      let state = await getConfig();
-      setDefaultValues(state);
-    }
+    appConfig && setDefaultValues(appConfig);
+  }, [appConfig]);
+  const setStoredConfigAsDefaults = () => getConfigAndSet(setAppConfig);
+  useEffect(() => {
     setStoredConfigAsDefaults();
   }, []);
 
@@ -72,6 +78,12 @@ function Config() {
           />
           <button type="submit">Save</button>
         </form>
+        {appConfig && (
+          <Shortcut
+            onUpdate={setStoredConfigAsDefaults}
+            currentShortcut={appConfig.shortcut}
+          />
+        )}
       </header>
       {/* <button type="button" onClick={addFilePath}>
             Add file/program

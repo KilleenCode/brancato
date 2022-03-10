@@ -1,6 +1,6 @@
 {
   "name": "brancato",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "dependencies": {
     "@algolia/autocomplete-js": "^1.5.3",
@@ -13,6 +13,8 @@
     "@types/node": "^16.11.26",
     "@types/react": "^17.0.39",
     "@types/react-dom": "^17.0.13",
+    "hotkeys-js": "^3.8.7",
+    "keycode": "^2.2.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-hook-form": "^7.27.1",

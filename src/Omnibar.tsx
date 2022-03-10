@@ -2,12 +2,7 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { appWindow } from "@tauri-apps/api/window";
 import { useEffect, useState } from "react";
 import { Action, Autocomplete } from "./components/Autocomplete";
-import { getConfig } from "./utils";
-
-enum AppEvents {
-  OmnibarFocused = "omnibar-focus",
-  AppStateUpdated = "state-updated",
-}
+import { AppEvents, Commands, getConfig } from "./utils";
 
 const focusSearchBar = () => {
   let input = document.querySelector(".aa-Input") as HTMLElement | null;
@@ -40,7 +35,7 @@ const Omnibar = () => {
   }, []);
 
   const handleRunWorkflow = async (label: string) => {
-    invoke("run_workflow", { label });
+    invoke(Commands.RunWorkflow, { label });
   };
 
   return (
@@ -85,7 +80,7 @@ const Omnibar = () => {
                 return item.label;
               },
               getItems({ state }: { state: any }) {
-                return [{ label: "Settings", action: "open_settings" }];
+                return [{ label: "Settings", action: Commands.OpenSettings }];
               },
               // Run this code when item is selected
               onSelect(params: any) {
