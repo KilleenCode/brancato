@@ -1,6 +1,6 @@
 [package]
 name = "brancato"
-version = "0.3.0"
+version = "0.4.0"
 description = "A tool for stage-managing your life"
 authors = ["Ryan Killeen"]
 license = ""
