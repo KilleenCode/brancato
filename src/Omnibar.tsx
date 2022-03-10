@@ -8,6 +8,21 @@ const focusSearchBar = () => {
   let input = document.querySelector(".aa-Input") as HTMLElement | null;
   input?.focus();
 };
+
+function getQueryPattern(query: string, flags = "i") {
+  const pattern = new RegExp(
+    `(${query
+      .trim() // Trim leading and ending whitespace
+      .toLowerCase() // convert to lower case
+      .split(" ") // Split on spaces for multiple commands
+      .map((token) => `^${token}`) // Map over the resulting array and create Regex_
+      .join("|")})`, // Join those expressions with an OR |
+    flags
+  );
+
+  return pattern;
+}
+
 const Omnibar = () => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   async function setStoredConfigChoices() {
@@ -46,62 +61,69 @@ const Omnibar = () => {
           openOnFocus
           autoFocus
           defaultActiveItemId={0}
-          getSources={({ query }: { query: any }) => [
-            {
-              sourceId: "workflows",
-              getItemInputValue({ item }: { item: any }) {
-                return item.label;
-              },
-              getItems({ state }: { state: any }) {
-                return suggestions.map((sug) => ({ label: sug }));
-              },
-              // Run this code when item is selected
-              onSelect(params: any) {
-                // item is the full item data
-                // setQuery is a hook to set the query state
-                const { item, setQuery } = params;
+          getSources={({ query }: { query: any }) => {
+            const pattern = getQueryPattern(query);
+            return [
+              {
+                sourceId: "workflows",
+                getItemInputValue({ item }: { item: any }) {
+                  return item.label;
+                },
+                getItems({ state }: { state: any }) {
+                  return suggestions
+                    .filter((label) => pattern.test(label))
+                    .map((sug) => ({ label: sug }));
+                },
+                // Run this code when item is selected
+                onSelect(params: any) {
+                  // item is the full item data
+                  // setQuery is a hook to set the query state
+                  const { item, setQuery } = params;
 
-                handleRunWorkflow(item.label);
-                setQuery("");
-              },
-              // Templates for Header of this source and Items in this source
-              templates: {
-                header() {
-                  return <h2>Workflows</h2>;
+                  handleRunWorkflow(item.label);
+                  setQuery("");
                 },
-                item({ item }: { item: any }) {
-                  return <Action hit={item} />;
+                // Templates for Header of this source and Items in this source
+                templates: {
+                  header() {
+                    return <h2>Workflows</h2>;
+                  },
+                  item({ item }: { item: any }) {
+                    return <Action hit={item} />;
+                  },
                 },
               },
-            },
-            {
-              sourceId: "settings",
-              getItemInputValue({ item }: { item: any }) {
-                return item.label;
-              },
-              getItems({ state }: { state: any }) {
-                return [{ label: "Settings", action: Commands.OpenSettings }];
-              },
-              // Run this code when item is selected
-              onSelect(params: any) {
-                // item is the full item data
-                // setQuery is a hook to set the query state
-                const { item, setQuery } = params;
+              {
+                sourceId: "settings",
+                getItemInputValue({ item }: { item: any }) {
+                  return item.label;
+                },
+                getItems({ state }: { state: any }) {
+                  return [
+                    { label: "Settings", action: Commands.OpenSettings },
+                  ].filter(({ label }) => pattern.test(label));
+                },
+                // Run this code when item is selected
+                onSelect(params: any) {
+                  // item is the full item data
+                  // setQuery is a hook to set the query state
+                  const { item, setQuery } = params;
 
-                invoke(item.action);
-                setQuery("");
-              },
-              // Templates for Header of this source and Items in this source
-              templates: {
-                header() {
-                  return <h2>Settings</h2>;
+                  invoke(item.action);
+                  setQuery("");
                 },
-                item({ item }: { item: any }) {
-                  return <Action hit={item} />;
+                // Templates for Header of this source and Items in this source
+                templates: {
+                  header() {
+                    return <h2>Settings</h2>;
+                  },
+                  item({ item }: { item: any }) {
+                    return <Action hit={item} />;
+                  },
                 },
               },
-            },
-          ]}
+            ];
+          }}
         />
       </form>
     </div>
