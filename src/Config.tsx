@@ -5,6 +5,9 @@ import { DevTool } from "@hookform/devtools";
 import { useForm } from "react-hook-form";
 import WorkflowArray from "./forms/workflow-array";
 import { getConfig } from "./utils";
+import hotkeys from "hotkeys-js";
+import keycode from "keycode";
+import Shortcut from "./components/Shortcut";
 
 export type Workflow = {
   name: string;
@@ -35,6 +38,7 @@ function Config() {
   const onSubmit = (data: Workflows) => {
     invoke("save_workflows", { config: data });
   };
+
   useEffect(() => {
     reset(defaultValues);
   }, [defaultValues, reset]);
@@ -72,6 +76,7 @@ function Config() {
           />
           <button type="submit">Save</button>
         </form>
+        <Shortcut />
       </header>
       {/* <button type="button" onClick={addFilePath}>
             Add file/program
