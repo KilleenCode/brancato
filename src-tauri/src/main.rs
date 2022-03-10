@@ -33,12 +33,11 @@ fn update_config_and_state(
 ) -> Result<(), tauri::Error> {
   let mut app_state = state.0.lock().expect("Could not lock mutex");
   config::set_config(&new_config);
-  let payload = new_config.clone();
   *app_state = new_config;
   app
     .get_window("omnibar")
     .unwrap()
-    .emit("state-updated", payload)?;
+    .emit("state-updated", "")?;
   Ok(())
 }
 
