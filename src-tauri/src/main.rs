@@ -8,9 +8,11 @@ mod workflows;
 
 use std::{env, path::Path, sync::Mutex};
 use tauri::{
-  AppHandle, CustomMenuItem, GlobalShortcutManager, Manager, RunEvent, SystemTray, SystemTrayEvent,
-  SystemTrayMenu, SystemTrayMenuItem,
+  AppHandle, CustomMenuItem, GlobalShortcutManager, Manager, RunEvent, State, SystemTray,
+  SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
 };
+
+use config::Config;
 
 extern crate open;
 
@@ -24,35 +26,32 @@ fn open_app(path: &str) {
 }
 
 #[tauri::command]
-fn save_workflows(state: tauri::State<AppState>, app: tauri::AppHandle, config: config::Config) {
+fn save_workflows(state: State<AppState>, app: AppHandle, config: Config) {
   let mut app_state = state.0.lock().expect("Could not lock mutex");
-  let config_as_string = serde_json::to_string(&config).expect("couldnt serialize");
-
-  // Update state
-  *app_state = config_as_string;
   // Save to file
-  config::set_config(config);
+  config::set_config(&config);
+  // Update state
+  *app_state = config;
   // Instruct client
   app.get_window("omnibar").unwrap().emit("state-updated", "");
 }
 
 #[derive(Default)]
-struct AppState(Mutex<String>);
+struct AppState(Mutex<Config>);
 
-fn _get_state(state: tauri::State<AppState>) -> config::Config {
+fn _get_state(state: State<AppState>) -> Config {
   let config_mutex = state.0.lock().expect("Could not lock mutex");
-  let config: config::Config =
-    serde_json::from_str(&*config_mutex).expect("Couldn't convert state");
+  let config = config_mutex.clone();
   config
 }
 
 #[tauri::command]
-fn get_state(state: tauri::State<AppState>) -> config::Config {
+fn get_state(state: State<AppState>) -> Config {
   _get_state(state)
 }
 
 #[tauri::command]
-async fn run_workflow(state: tauri::State<'_, AppState>, label: String) -> Result<(), ()> {
+async fn run_workflow(state: State<'_, AppState>, label: String) -> Result<(), ()> {
   let current_state = _get_state(state);
 
   let workflow = current_state
@@ -72,7 +71,7 @@ async fn run_workflow(state: tauri::State<'_, AppState>, label: String) -> Resul
 }
 
 #[tauri::command]
-async fn open_settings(app: tauri::AppHandle) {
+async fn open_settings(app: AppHandle) {
   focus_window(&app, "settings".to_owned());
 }
 
@@ -147,9 +146,7 @@ fn main() {
       }
       _ => {}
     })
-    .manage(AppState(Mutex::new(
-      serde_json::to_string(&user_config).expect("couldnt serialize"),
-    )))
+    .manage(AppState(Mutex::new(user_config)))
     .invoke_handler(tauri::generate_handler![
       get_state,
       save_workflows,

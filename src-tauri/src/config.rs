@@ -4,7 +4,7 @@ use std::fs;
 
 use super::workflows::Workflow;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Default, Clone, Serialize, Deserialize, Debug)]
 pub struct Config {
   pub workflows: Vec<Workflow>,
 }
@@ -30,10 +30,10 @@ pub fn get_config() -> Config {
   }
 }
 
-pub fn set_config(config: Config) {
+pub fn set_config(config: &Config) {
   if let Some(proj_dirs) = ProjectDirs::from("", "", "Brancato") {
     let config_dir = proj_dirs.config_dir();
-    let data = serde_json::to_string(&config).expect("Unable to parse struct");
+    let data = serde_json::to_string(config).expect("Unable to parse struct");
     let path = config_dir.join("config.json");
     let prefix = path.parent().unwrap();
     fs::create_dir_all(prefix).unwrap();
