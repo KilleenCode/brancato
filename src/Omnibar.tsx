@@ -23,6 +23,22 @@ function getQueryPattern(query: string, flags = "i") {
   return pattern;
 }
 
+function highlight(text: string, pattern: RegExp) {
+  // Split the text based on the pattern
+  const tokens = text.split(pattern);
+
+  // Map over the split text and test against the pattern
+  return tokens.map((token) => {
+    // If the pattern matches the text, wrap the text in <mark>
+    if (!pattern.test("") && pattern.test(token)) {
+      return <mark>{token}</mark>;
+    }
+
+    // return the token back to the array
+    return token;
+  });
+}
+
 const Omnibar = () => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   async function setStoredConfigChoices() {
@@ -72,7 +88,10 @@ const Omnibar = () => {
                 getItems({ state }: { state: any }) {
                   return suggestions
                     .filter((label) => pattern.test(label))
-                    .map((sug) => ({ label: sug }));
+                    .map((sug) => ({
+                      label: sug,
+                      highlighted: highlight(sug, pattern),
+                    }));
                 },
                 // Run this code when item is selected
                 onSelect(params: any) {
@@ -99,9 +118,12 @@ const Omnibar = () => {
                   return item.label;
                 },
                 getItems({ state }: { state: any }) {
-                  return [
-                    { label: "Settings", action: Commands.OpenSettings },
-                  ].filter(({ label }) => pattern.test(label));
+                  return [{ label: "Settings", action: Commands.OpenSettings }]
+                    .filter(({ label }) => pattern.test(label))
+                    .map((action) => ({
+                      ...action,
+                      highlighted: highlight(action.label, pattern),
+                    }));
                 },
                 // Run this code when item is selected
                 onSelect(params: any) {
@@ -118,6 +140,7 @@ const Omnibar = () => {
                     return <h2>Settings</h2>;
                   },
                   item({ item }: { item: any }) {
+                    console.log(item);
                     return <Action hit={item} />;
                   },
                 },
