@@ -18,7 +18,6 @@ pub fn get_config() -> Config {
     let read_path = config_dir.join("config.json");
 
     let config_file = fs::read_to_string(&read_path);
-    println!("read path: {:#?}", read_path);
     let config: Config = match config_file {
       Ok(file) => serde_json::from_str(&file).unwrap(),
       Err(_) => default,
@@ -37,8 +36,6 @@ pub fn set_config(config: &Config) {
     let path = config_dir.join("config.json");
     let prefix = path.parent().unwrap();
     fs::create_dir_all(prefix).unwrap();
-    println!("save path: {:#?}", path);
-    println!("save data: {}", data);
     fs::write(path, data).expect("Unable to write file");
   }
 }
