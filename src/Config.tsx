@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import "./App.css";
 import { invoke } from "@tauri-apps/api/tauri";
 import { DevTool } from "@hookform/devtools";
-import { useForm, useFormState, useWatch } from "react-hook-form";
+import { useForm, useFormState } from "react-hook-form";
 import WorkflowArray from "./forms/workflow-array";
 import { Commands, getConfig } from "./utils";
 import Shortcut from "./components/Shortcut";
