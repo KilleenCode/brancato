@@ -1,13 +1,17 @@
+import { invoke } from "@tauri-apps/api";
 import hotkeys from "hotkeys-js";
 import keycode from "keycode";
 import { useEffect, useState } from "react";
-const DEFAULT_SHORCUT = "alt+m";
+import { Commands } from "../utils";
 
-const updateOmnibarShortcut = () => {
-    
-};
-const Shortcut = () => {
-  const [shortcut, setShortcut] = useState(DEFAULT_SHORCUT);
+const Shortcut = ({
+  currentShortcut,
+  onUpdate,
+}: {
+  currentShortcut: string;
+  onUpdate: () => void;
+}) => {
+  const [shortcut, setShortcut] = useState(currentShortcut);
   const [editingShortcut, setEditingShortcut] = useState(false);
   const [listenForKeys, setListenForKeys] = useState(false);
 
@@ -23,13 +27,19 @@ const Shortcut = () => {
             return name;
           }
         });
-        setShortcut(currentKeyValues.join("+"));
+        setShortcut(currentKeyValues.join(" + "));
       });
     } else {
       hotkeys.unbind();
     }
   }, [listenForKeys]);
 
+  const onSave = () => {
+    setListenForKeys(!listenForKeys);
+    setEditingShortcut(false);
+    invoke(Commands.SetShortcut, { shortcut });
+    onUpdate();
+  };
   return (
     <div>
       <p>
@@ -47,16 +57,7 @@ const Shortcut = () => {
           </button>
         )}
         {editingShortcut && <p>Begin typing your shortcut commands</p>}
-        {editingShortcut && (
-          <button
-            onClick={() => {
-              setListenForKeys(!listenForKeys);
-              setEditingShortcut(false);
-            }}
-          >
-            Save
-          </button>
-        )}
+        {editingShortcut && <button onClick={onSave}>Save</button>}
       </div>
     </div>
   );

@@ -26,22 +26,30 @@ fn _get_state(state: State<AppState>) -> Config {
   config
 }
 
+fn update_config_and_state(
+  app: &AppHandle,
+  state: State<AppState>,
+  new_config: Config,
+) -> Result<(), tauri::Error> {
+  let mut app_state = state.0.lock().expect("Could not lock mutex");
+  config::set_config(&new_config);
+  let payload = new_config.clone();
+  *app_state = new_config;
+  app
+    .get_window("omnibar")
+    .unwrap()
+    .emit("state-updated", payload)?;
+  Ok(())
+}
+
 #[tauri::command]
 fn save_workflows(
   state: State<AppState>,
   app: AppHandle,
   config: Config,
 ) -> Result<(), tauri::Error> {
-  let mut app_state = state.0.lock().expect("Could not lock mutex");
-  // Save to file
-  config::set_config(&config);
-  // Update state
-  *app_state = config;
-  // Instruct client
-  app
-    .get_window("omnibar")
-    .unwrap()
-    .emit("state-updated", "")?;
+  update_config_and_state(&app, state, config).ok();
+
   Ok(())
 }
 
@@ -71,6 +79,35 @@ async fn run_workflow(state: State<'_, AppState>, label: String) -> Result<(), (
 #[tauri::command]
 async fn open_settings(app: AppHandle) -> Result<(), tauri::Error> {
   focus_window(&app, "settings".to_owned())?;
+  Ok(())
+}
+
+#[tauri::command]
+async fn set_shortcut(
+  app: AppHandle,
+  state: State<'_, AppState>,
+  shortcut: String,
+) -> Result<(), tauri::Error> {
+  let config = _get_state(state.clone());
+
+  let new_config = Config {
+    shortcut: shortcut.to_owned(),
+    ..config.to_owned()
+  };
+
+  let app_ref = &app.clone();
+  app
+    .global_shortcut_manager()
+    .unregister(&config.shortcut)
+    .ok();
+  app
+    .global_shortcut_manager()
+    .register(&new_config.shortcut, move || {
+      open_omnibar(&app).ok();
+    })
+    .ok();
+
+  update_config_and_state(app_ref, state, new_config).ok();
   Ok(())
 }
 
@@ -136,7 +173,8 @@ fn main() {
       get_state,
       save_workflows,
       run_workflow,
-      open_settings
+      open_settings,
+      set_shortcut
     ])
     .build(tauri::generate_context!())
     .expect("error while running tauri application");
@@ -145,9 +183,11 @@ fn main() {
     // Application is ready (triggered only once)
     RunEvent::Ready => {
       let app_handle = app_handle.clone();
+      let startup_shortcut = _get_state(app_handle.state::<AppState>()).shortcut;
+
       app_handle
         .global_shortcut_manager()
-        .register("Alt+m", move || {
+        .register(&startup_shortcut, move || {
           open_omnibar(&app_handle).ok();
         })
         .expect("Couldn't create shortcut");
