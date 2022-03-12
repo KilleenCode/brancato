@@ -1,10 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
 import "./App.css";
-import { invoke } from "@tauri-apps/api/tauri";
-import { DevTool } from "@hookform/devtools";
-import { useForm, useFormState } from "react-hook-form";
-import WorkflowArray from "./forms/workflow-array";
-import { Commands, getConfig } from "./utils";
 import Shortcut from "./components/Shortcut";
 import * as Tabs from "@radix-ui/react-tabs";
 import WorkflowSettings from "./forms/workflow-settings";
@@ -51,14 +45,7 @@ function Config() {
   return (
     <div className="App">
       <header className="App-header">
-        {/* <p
-          style={{
-            opacity: showSaving ? 1 : 0,
-            transition: "opacity 1s ease-out",
-          }}
-        >
-          Saving...
-        </p> */}
+  
         <Tabs.Root defaultValue={TabSections.WorkflowSettings}>
           <Tabs.List>
             <Tabs.Trigger value={TabSections.WorkflowSettings}>

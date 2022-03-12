@@ -139,6 +139,11 @@ fn main() {
         size: _,
         ..
       } => {
+        // tauri::window::WindowBuilder::new(
+        //   app,
+        //   "settings",
+        //   tauri::WindowUrl::App("/settings".into()),
+        // );
         focus_window(app, "settings".to_owned()).ok();
       }
 

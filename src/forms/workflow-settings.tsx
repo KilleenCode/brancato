@@ -1,8 +1,8 @@
 import { invoke } from "@tauri-apps/api";
-import { debounce } from "lodash";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useForm, useFormState } from "react-hook-form";
 import { Workflows } from "../Config";
+import useWarningOnExit from "../hooks/use-warning-on-unload";
 import { Commands, getConfig } from "../utils";
 import WorkflowArray from "./workflow-array";
 
@@ -11,44 +11,35 @@ const WorkflowSettings = () => {
 
   const [defaultValues, setDefaultValues] = useState<Workflows | undefined>();
 
-  useEffect(() => {
-    getConfig().then((data) => setDefaultValues(data));
-  }, []);
-
   const { control, register, handleSubmit, getValues, setValue, reset } =
     useForm<Workflows>({
       defaultValues,
     });
   const { isDirty, isValid, isSubmitting } = useFormState({ control });
-  console.log("render");
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const onSubmit = useCallback(
-    handleSubmit((data: Workflows) => {
-      invoke(Commands.SaveWorkflows, { config: data });
-    }),
-    [reset, handleSubmit]
-  );
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedSubmit = useCallback(debounce(onSubmit, 1200), []);
 
   useEffect(() => {
-    if (isDirty && isValid) {
-      debouncedSubmit();
-    }
-  }, [isDirty, isValid, debouncedSubmit]);
+    getConfig().then((data) => setDefaultValues(data));
+  }, []);
 
+  console.log("render", { isDirty, isValid, isSubmitting });
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const onSubmit = (data: Workflows) => {
+    invoke(Commands.SaveWorkflows, { config: data });
+  };
+
+  useWarningOnExit(isDirty);
   //
   useEffect(() => {
     reset(defaultValues);
   }, [defaultValues, reset]);
 
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <WorkflowArray
         {...{ control, register, defaultValues, getValues, setValue }}
       />
+      <button disabled={isSubmitting}>Save</button>
     </form>
   );
 };
