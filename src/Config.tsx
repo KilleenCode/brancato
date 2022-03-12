@@ -46,14 +46,12 @@ function Config() {
     getValues,
     setValue,
     reset,
-    trigger,
     formState,
   } = useForm<Workflows>({
     defaultValues,
   });
   const { isSubmitting } = formState;
-  const { isDirty } = useFormState({ control });
-  console.log({ isDirty, isSubmitting });
+  const { isDirty, isValid } = useFormState({ control });
 
   useEffect(() => {
     setTimeout(() => {
@@ -72,17 +70,10 @@ function Config() {
   );
 
   useEffect(() => {
-    async function validateAndSubmit() {
-      const valid = await trigger();
-
-      if (valid) {
-        handleSubmit(onSubmit)();
-      }
+    if (isDirty && isValid) {
+      handleSubmit(onSubmit)();
     }
-    if (isDirty) {
-      validateAndSubmit();
-    }
-  }, [isDirty, handleSubmit, trigger, onSubmit]);
+  }, [isDirty, handleSubmit, isValid, onSubmit]);
 
   //
   useEffect(() => {
@@ -149,7 +140,9 @@ function Config() {
       {/* <button type="button" onClick={addFilePath}>
             Add file/program
           </button> */}
-      <DevTool control={control} />
+      {(!process.env.NODE_ENV || process.env.NODE_ENV === "development") && (
+        <DevTool control={control} />
+      )}
     </div>
   );
 }
