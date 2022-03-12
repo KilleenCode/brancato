@@ -7,6 +7,7 @@ import WorkflowArray from "./forms/workflow-array";
 import { Commands, getConfig } from "./utils";
 import Shortcut from "./components/Shortcut";
 import * as Tabs from "@radix-ui/react-tabs";
+import debounce from "lodash/debounce";
 
 export type Workflow = {
   name: string;
@@ -46,14 +47,12 @@ function Config() {
     getValues,
     setValue,
     reset,
-    trigger,
     formState,
   } = useForm<Workflows>({
     defaultValues,
   });
   const { isSubmitting } = formState;
-  const { isDirty } = useFormState({ control });
-  console.log({ isDirty, isSubmitting });
+  const { isDirty, isValid } = useFormState({ control });
 
   useEffect(() => {
     setTimeout(() => {
@@ -64,25 +63,22 @@ function Config() {
     }, 300);
   }, [isSubmitting]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const onSubmit = useCallback(
-    (data: Workflows) => {
+    handleSubmit((data: Workflows) => {
       invoke(Commands.SaveWorkflows, { config: data }).then(() => reset(data));
-    },
-    [reset]
+    }),
+    [reset, handleSubmit]
   );
 
-  useEffect(() => {
-    async function validateAndSubmit() {
-      const valid = await trigger();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedSubmit = useCallback(debounce(onSubmit, 1200), []);
 
-      if (valid) {
-        handleSubmit(onSubmit)();
-      }
+  useEffect(() => {
+    if (isDirty && isValid) {
+      debouncedSubmit();
     }
-    if (isDirty) {
-      validateAndSubmit();
-    }
-  }, [isDirty, handleSubmit, trigger, onSubmit]);
+  }, [isDirty, isValid, debouncedSubmit]);
 
   //
   useEffect(() => {
@@ -134,7 +130,7 @@ function Config() {
             </Tabs.Trigger>
           </Tabs.List>
           <Tabs.Content value={TabSections.WorkflowSettings}>
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={onSubmit}>
               <WorkflowArray
                 {...{ control, register, defaultValues, getValues, setValue }}
               />
@@ -149,7 +145,9 @@ function Config() {
       {/* <button type="button" onClick={addFilePath}>
             Add file/program
           </button> */}
-      <DevTool control={control} />
+      {(!process.env.NODE_ENV || process.env.NODE_ENV === "development") && (
+        <DevTool control={control} />
+      )}
     </div>
   );
 }
