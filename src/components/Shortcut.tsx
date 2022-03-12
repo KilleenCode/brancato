@@ -2,13 +2,15 @@ import { invoke } from "@tauri-apps/api";
 import hotkeys from "hotkeys-js";
 import keycode from "keycode";
 import { useEffect, useState } from "react";
-import { Commands } from "../utils";
+import { Commands, getConfig } from "../utils";
 
-const Shortcut = ({ currentShortcut }: { currentShortcut: string }) => {
-  const [shortcut, setShortcut] = useState(currentShortcut);
+const Shortcut = () => {
+  const [shortcut, setShortcut] = useState<string | undefined>();
   const [editingShortcut, setEditingShortcut] = useState(false);
   const [listenForKeys, setListenForKeys] = useState(false);
-
+  useEffect(() => {
+    getConfig().then((data) => setShortcut(data.shortcut));
+  }, []);
   useEffect(() => {
     if (listenForKeys) {
       hotkeys("*", () => {
@@ -37,7 +39,7 @@ const Shortcut = ({ currentShortcut }: { currentShortcut: string }) => {
     <div>
       <p>
         Shortcut: <code>{shortcut}</code>
-      </p>{" "}
+      </p>
       <div>
         {!editingShortcut && (
           <button
