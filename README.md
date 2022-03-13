@@ -1,4 +1,5 @@
 # Brancato
+[![publish](https://github.com/RyKilleen/brancato/actions/workflows/main.yml/badge.svg)](https://github.com/RyKilleen/brancato/actions/workflows/main.yml)
 
 A task runner to make managing your day-to-day life that much easier.
 
