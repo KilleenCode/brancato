@@ -15,13 +15,11 @@ const WorkflowSettings = () => {
     useForm<Workflows>({
       defaultValues,
     });
-  const { isDirty, isValid, isSubmitting } = useFormState({ control });
+  const { isDirty, isSubmitting } = useFormState({ control });
 
   useEffect(() => {
     getConfig().then((data) => setDefaultValues(data));
   }, []);
-
-  console.log("render", { isDirty, isValid, isSubmitting });
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onSubmit = (data: Workflows) => {

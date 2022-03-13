@@ -12,9 +12,8 @@ export const Action = ({ hit }) => {
           <div className="aa-ItemContentBody">
             <div className="aa-ItemContentTitle">
               <span>{hit.label}</span>
-              {/* {hit.enabled && (
-                <code className="aa-ItemContentTitleNote">Enabled</code>
-              )} */}
+              {hit.description && <div style={{fontSize: '0.8rem', paddingRight: '1rem'}}>{hit.description}</div>}
+              
             </div>
           </div>
         </div>
