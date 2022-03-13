@@ -1,5 +1,5 @@
 import Config from "./Config";
-import Omnibar from "./Omnibar";
+import Omnibar from "./components/Omnibar/Omnibar";
 
 function App() {
   const settingsPage = window.location.pathname === "/settings";
