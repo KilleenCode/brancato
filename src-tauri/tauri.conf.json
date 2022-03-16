@@ -46,7 +46,7 @@
       },
       "windows": {
         "certificateThumbprint": "C8577E1A7317EF59589BFD88C1E4B96D4A80B7CF",
-        "digestAlgorithm": "sha256",
+        "digestAlgorithm": "sha384",
         "timestampUrl": ""
       }
     },
