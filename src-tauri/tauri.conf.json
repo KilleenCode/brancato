@@ -45,7 +45,7 @@
         "entitlements": null
       },
       "windows": {
-        "certificateThumbprint": null,
+        "certificateThumbprint": "C8577E1A7317EF59589BFD88C1E4B96D4A80B7CF",
         "digestAlgorithm": "sha256",
         "timestampUrl": ""
       }
