@@ -9,7 +9,7 @@ const Shortcut = () => {
   const [editingShortcut, setEditingShortcut] = useState(false);
   const [listenForKeys, setListenForKeys] = useState(false);
   useEffect(() => {
-    getConfig().then((data) => setShortcut(data.shortcut));
+    getConfig().then((data) => setShortcut(data.user_config.shortcut));
   }, []);
   useEffect(() => {
     if (listenForKeys) {
@@ -35,6 +35,7 @@ const Shortcut = () => {
     setEditingShortcut(false);
     invoke(Commands.SetShortcut, { shortcut });
   };
+
   return (
     <div>
       <p>

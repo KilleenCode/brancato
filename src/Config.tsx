@@ -2,6 +2,7 @@ import "./App.css";
 import Shortcut from "./components/Shortcut";
 import * as Tabs from "@radix-ui/react-tabs";
 import WorkflowSettings from "./forms/workflow-settings";
+import Filepath from "./components/Filepath";
 
 export type Workflow = {
   name: string;
@@ -10,7 +11,7 @@ export type Workflow = {
   }[];
 };
 
-export type Workflows = {
+export type UserConfig = {
   workflows: Workflow[];
   shortcut: string;
 };
@@ -26,26 +27,9 @@ enum TabSections {
 }
 
 function Config() {
-  // const addFilePath = () => {
-  //   dialog.open({ multiple: false }).then((data) => {
-  //     console.log(data);
-  //     let path = data as string;
-  //     setPathFromFile(path);
-  //   });
-  // };
-  // useEffect(() => {
-  //   if (pathFromFile) {
-  //     append({
-  //       path: pathFromFile,
-  //     });
-  //     setPathFromFile(undefined);
-  //   }
-  // }, [pathFromFile, append]);
-
   return (
     <div className="App">
       <header className="App-header">
-  
         <Tabs.Root defaultValue={TabSections.WorkflowSettings}>
           <Tabs.List>
             <Tabs.Trigger value={TabSections.WorkflowSettings}>
@@ -60,15 +44,11 @@ function Config() {
           </Tabs.Content>
           <Tabs.Content value={TabSections.Preferences}>
             <Shortcut />
+            <hr />
+            <Filepath />
           </Tabs.Content>
         </Tabs.Root>
       </header>
-      {/* <button type="button" onClick={addFilePath}>
-            Add file/program
-          </button> */}
-      {/* {(!process.env.NODE_ENV || process.env.NODE_ENV === "development") && (
-        <DevTool control={control} />
-      )} */}
     </div>
   );
 }

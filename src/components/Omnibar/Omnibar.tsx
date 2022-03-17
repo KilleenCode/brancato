@@ -45,7 +45,7 @@ const Omnibar = () => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   async function setStoredConfigChoices() {
     let state = await getConfig();
-    setSuggestions(state.workflows.map((wf) => wf.name));
+    setSuggestions(state.user_config.workflows.map((wf) => wf.name));
   }
   useEffect(() => {
     const unlisten1 = appWindow.listen(
