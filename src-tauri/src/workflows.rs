@@ -22,7 +22,7 @@ pub fn open_app(path: &str) {
 }
 
 pub fn run_step(path: &str) {
-  if path.contains("https") {
+  if path.contains("http://") || path.contains("https://") {
     open::that_in_background(&path);
   } else {
     open_app(&path);
