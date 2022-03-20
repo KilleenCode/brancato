@@ -3,36 +3,36 @@
   windows_subsystem = "windows"
 )]
 
-mod config;
+mod app_config;
+mod user_config;
 mod windows;
 mod workflows;
 
-use std::{env, sync::Mutex};
+use app_config::{set_custom_user_config_path, AppConfig};
+use serde::Serialize;
+use std::{env, path::PathBuf, sync::Mutex};
 use tauri::{
-  AppHandle, CustomMenuItem, GlobalShortcutManager, Manager, RunEvent, State, SystemTray,
-  SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
+  api::dialog::blocking::FileDialogBuilder, AppHandle, CustomMenuItem, GlobalShortcutManager,
+  Manager, RunEvent, State, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
 };
 
-use config::Config;
+use user_config::{set_user_config, UserConfig};
 use windows::focus_window;
 use workflows::run_step;
 
-#[derive(Default)]
-struct AppState(Mutex<Config>);
-
-fn _get_state(state: State<AppState>) -> Config {
-  let config_mutex = state.0.lock().expect("Could not lock mutex");
-  let config = config_mutex.clone();
-  config
+#[derive(Default, Serialize)]
+struct AppState {
+  user_config: UserConfig,
+  app_config: AppConfig,
 }
 
-fn update_config_and_state(
+fn update_user_config_and_state(
   app: &AppHandle,
-  state: State<AppState>,
-  new_config: Config,
+  user_config: State<Mutex<UserConfig>>,
+  new_config: UserConfig,
 ) -> Result<(), tauri::Error> {
-  let mut app_state = state.0.lock().expect("Could not lock mutex");
-  config::set_config(&new_config);
+  let mut app_state = user_config.lock().expect("Could not lock mutex");
+  set_user_config(&new_config);
   *app_state = new_config;
 
   app
@@ -43,24 +43,59 @@ fn update_config_and_state(
 }
 
 #[tauri::command]
-fn save_workflows(
-  state: State<AppState>,
+fn save_user_config(
+  state: State<Mutex<UserConfig>>,
   app: AppHandle,
-  config: Config,
+  config: UserConfig,
 ) -> Result<(), tauri::Error> {
-  update_config_and_state(&app, state, config).ok();
+  update_user_config_and_state(&app, state, config).ok();
 
   Ok(())
 }
 
 #[tauri::command]
-fn get_state(state: State<AppState>) -> Config {
-  _get_state(state)
+fn get_state(
+  user_config_state: State<Mutex<UserConfig>>,
+  app_config_state: State<Mutex<AppConfig>>,
+) -> AppState {
+  let user_config = user_config_state
+    .lock()
+    .expect("Could not lock mutex")
+    .clone();
+
+  let app_config = app_config_state
+    .lock()
+    .expect("Couldn't lock mutex")
+    .clone();
+
+  let state = AppState {
+    user_config,
+    app_config,
+  };
+  return state;
 }
 
 #[tauri::command]
-async fn run_workflow(state: State<'_, AppState>, label: String) -> Result<(), ()> {
-  let current_state = _get_state(state);
+fn set_user_config_path(app_config_state: State<Mutex<AppConfig>>) -> Option<PathBuf> {
+  let folder_path = FileDialogBuilder::new().pick_folder();
+
+  match folder_path {
+    Some(path) => match set_custom_user_config_path(path.clone()) {
+      Ok(updated_config) => {
+        let mut state = app_config_state.lock().expect("Couldn't lock");
+
+        *state = updated_config;
+        Some(path)
+      }
+      Err(_) => None,
+    },
+    None => None,
+  }
+}
+
+#[tauri::command]
+async fn run_workflow(state: State<'_, Mutex<UserConfig>>, label: String) -> Result<(), ()> {
+  let current_state = state.lock().expect("Can't unlock").clone();
 
   let mut workflow = current_state
     .workflows
@@ -85,12 +120,12 @@ async fn open_settings(app: AppHandle) -> Result<(), tauri::Error> {
 #[tauri::command]
 async fn set_shortcut(
   app: AppHandle,
-  state: State<'_, AppState>,
+  user_config: State<'_, Mutex<UserConfig>>,
   shortcut: String,
 ) -> Result<(), tauri::Error> {
-  let config = _get_state(state.clone());
+  let config = user_config.lock().expect("Could not lock mutex").clone();
 
-  let new_config = Config {
+  let new_config = UserConfig {
     shortcut: shortcut.to_owned(),
     ..config.to_owned()
   };
@@ -107,7 +142,7 @@ async fn set_shortcut(
     })
     .ok();
 
-  update_config_and_state(app_ref, state, new_config).ok();
+  update_user_config_and_state(app_ref, user_config, new_config).ok();
   Ok(())
 }
 
@@ -119,7 +154,8 @@ fn open_omnibar(app: &AppHandle) -> Result<(), tauri::Error> {
   Ok(())
 }
 fn main() {
-  let user_config = config::get_config();
+  let app_config = app_config::get_or_create_app_config();
+  let user_config = user_config::get_user_config(app_config.user_config_path.clone());
 
   let quit = CustomMenuItem::new("quit", "Quit");
   let hide = CustomMenuItem::new("hide", "Hide");
@@ -173,13 +209,15 @@ fn main() {
       },
       _ => {}
     })
-    .manage(AppState(Mutex::new(user_config)))
+    .manage(Mutex::new(user_config))
+    .manage(Mutex::new(app_config))
     .invoke_handler(tauri::generate_handler![
       get_state,
-      save_workflows,
+      save_user_config,
       run_workflow,
       open_settings,
-      set_shortcut
+      set_shortcut,
+      set_user_config_path
     ])
     .build(tauri::generate_context!())
     .expect("error while running tauri application");
@@ -188,7 +226,12 @@ fn main() {
     // Application is ready (triggered only once)
     RunEvent::Ready => {
       let app_handle = app_handle.clone();
-      let startup_shortcut = _get_state(app_handle.state::<AppState>()).shortcut;
+      let startup_shortcut = app_handle
+        .state::<Mutex<UserConfig>>()
+        .lock()
+        .expect("Could not lock mutex")
+        .clone()
+        .shortcut;
 
       app_handle
         .global_shortcut_manager()

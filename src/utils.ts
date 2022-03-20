@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api";
-import { Workflows } from "./Config";
+import { UserConfig } from "./Config";
 
 export enum AppEvents {
   OmnibarFocused = "omnibar-focus",
@@ -11,10 +11,16 @@ export enum Commands {
   SetShortcut = "set_shortcut",
   OpenSettings = "open_settings",
   GetState = "get_state",
-  SaveWorkflows = "save_workflows",
+  SaveUserConfig = "save_user_config",
+  UpdateConfigPath = "set_user_config_path",
 }
 
+type AppConfig = {
+  user_config_path: String;
+};
+
+export type AppState = { user_config: UserConfig; app_config: AppConfig };
+
 export const getConfig = async () => {
-  const test = (await invoke(Commands.GetState)) as Workflows;
-  return test;
+  return (await invoke(Commands.GetState)) as AppState;
 };
