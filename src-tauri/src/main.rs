@@ -157,29 +157,14 @@ fn main() {
   let app_config = app_config::get_or_create_app_config();
   let user_config = user_config::get_user_config(app_config.user_config_path.clone());
 
-  let quit = CustomMenuItem::new("quit", "Quit");
-  let hide = CustomMenuItem::new("hide", "Hide");
-  let settings = CustomMenuItem::new("settings", "Settings");
-  let tray_menu = SystemTrayMenu::new()
-    .add_item(quit)
-    .add_native_item(SystemTrayMenuItem::Separator)
-    .add_item(settings)
-    .add_native_item(SystemTrayMenuItem::Separator)
-    .add_item(hide);
-  let system_tray = SystemTray::new().with_menu(tray_menu);
   let app = tauri::Builder::default()
-    .system_tray(system_tray)
+    .system_tray(SystemTray::new())
     .on_system_tray_event(|app, event| match event {
       SystemTrayEvent::LeftClick {
         position: _,
         size: _,
         ..
       } => {
-        // tauri::window::WindowBuilder::new(
-        //   app,
-        //   "settings",
-        //   tauri::WindowUrl::App("/settings".into()),
-        // );
         focus_window(app, "settings".to_owned()).ok();
       }
 
@@ -219,6 +204,28 @@ fn main() {
       set_shortcut,
       set_user_config_path
     ])
+    .setup(|app_handle| {
+      let tray_menu = SystemTrayMenu::new()
+        .add_item(CustomMenuItem::new("quit", "Quit"))
+        .add_item(CustomMenuItem::new("settings", "Settings"))
+        .add_item(CustomMenuItem::new("hide", "Hide"))
+        .add_native_item(SystemTrayMenuItem::Separator)
+        .add_item(
+          CustomMenuItem::new(
+            "version",
+            format!(
+              "Version {version}",
+              version = &app_handle.package_info().version
+            ),
+          )
+          .disabled(),
+        );
+      app_handle
+        .tray_handle()
+        .set_menu(tray_menu)
+        .expect("Set the tray damn it");
+      Ok(())
+    })
     .build(tauri::generate_context!())
     .expect("error while running tauri application");
 
