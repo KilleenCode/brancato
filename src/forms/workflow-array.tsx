@@ -1,8 +1,17 @@
-import { useFieldArray } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { defaultWorkflow } from "../Config";
 import WorkflowAction from "./workflow-action";
 
-export default function WorkflowArray({ control, register }: any) {
+export type NestedInputProps = Pick<
+  ReturnType<typeof useForm>,
+  "control" | "register" | "getValues" | "setValue"
+>;
+export default function WorkflowArray({
+  control,
+  register,
+  getValues,
+  setValue,
+}: any) {
   const { fields, append, remove } = useFieldArray({
     control,
     name: "workflows",
@@ -19,7 +28,7 @@ export default function WorkflowArray({ control, register }: any) {
 
               <WorkflowAction
                 nestIndex={index}
-                {...{ control, register }}
+                {...{ control, register, getValues, setValue }}
                 nestedRemove={remove}
               />
             </li>
