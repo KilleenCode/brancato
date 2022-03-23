@@ -38,9 +38,11 @@ const WorkflowAction = ({
               type="button"
               onClick={() => {
                 let value = getValues(fieldName);
+                let defaultPath = value && value.length > 0 ? value : undefined;
+         
                 dialog
-                  .open({ defaultPath: value ?? undefined })
-                  .then((path) => setValue(fieldName, path));
+                .open({ defaultPath})
+                .then((path) => setValue(fieldName, path));
               }}
             >
               Folder Path
