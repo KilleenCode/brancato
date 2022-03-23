@@ -1,5 +1,5 @@
 import { useFieldArray, UseFieldArrayRemove } from "react-hook-form";
-import { dialog } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api";
 import { NestedInputProps } from "./workflow-array";
 
 type Props = {
@@ -37,10 +37,11 @@ const WorkflowAction = ({
             <button
               type="button"
               onClick={() => {
-                let value = getValues(fieldName);
-                dialog
-                  .open({ defaultPath: value ?? undefined })
-                  .then((path) => setValue(fieldName, path));
+                let value = getValues(fieldName) as string;
+                let defaultPath = value && value.length > 0 ? value : undefined;
+                invoke("select_file", { defaultPath }).then(
+                  (value) => value && setValue(fieldName, value)
+                );
               }}
             >
               Folder Path

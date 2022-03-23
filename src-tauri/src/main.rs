@@ -10,7 +10,7 @@ mod workflows;
 
 use app_config::{set_custom_user_config_path, AppConfig};
 use serde::Serialize;
-use std::{env, path::PathBuf, sync::Mutex};
+use std::{path::PathBuf, sync::Mutex};
 use tauri::{
   api::dialog::blocking::FileDialogBuilder, AppHandle, CustomMenuItem, GlobalShortcutManager,
   Manager, RunEvent, State, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
@@ -73,6 +73,40 @@ fn get_state(
     app_config,
   };
   return state;
+}
+
+fn set_default_path(
+  mut dialog_builder: FileDialogBuilder,
+  default_path: PathBuf,
+) -> FileDialogBuilder {
+  if default_path.is_file() || !default_path.exists() {
+    if let (Some(parent), Some(file_name)) = (default_path.parent(), default_path.file_name()) {
+      dialog_builder = dialog_builder.set_directory(parent);
+      dialog_builder = dialog_builder.set_file_name(&file_name.to_string_lossy().to_string());
+    } else {
+      dialog_builder = dialog_builder.set_directory(default_path);
+    }
+    dialog_builder
+  } else {
+    dialog_builder.set_directory(default_path)
+  }
+}
+
+#[tauri::command]
+async fn select_file(default_path: Option<PathBuf>) -> Option<PathBuf> {
+  let dialog = match default_path {
+    Some(default_path) => {
+      let file_exists = std::path::Path::exists(&default_path);
+      if file_exists {
+        set_default_path(FileDialogBuilder::new(), default_path)
+      } else {
+        FileDialogBuilder::new()
+      }
+    }
+    None => FileDialogBuilder::new(),
+  };
+
+  dialog.pick_file()
 }
 
 #[tauri::command]
@@ -202,6 +236,7 @@ fn main() {
       run_workflow,
       open_settings,
       set_shortcut,
+      select_file,
       set_user_config_path
     ])
     .setup(|app_handle| {
