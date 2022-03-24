@@ -7,9 +7,10 @@ A task runner to make managing your day-to-day life that much easier.
 
 - [x] Run user-defined workflows, launching applications and URLs
 - [x] Web Search for Duck Duck Go, Stack Overflow and Google
+- [x] Calculator
 
 ### Roadmap
-- [ ] Calculator
+
 - [ ] File Search?
 
 ## Demo
@@ -19,8 +20,8 @@ https://user-images.githubusercontent.com/4615840/158048283-d207c649-7c91-487e-a
 
 ## Platforms
 
-**Tested**: Windows Latest
-Built, but **untested**: Mac, Linux
+**Tested**: Windows Latest, Mac Latest
+Built, but **untested**: Ubuntu Linux
 
 # Built With Tauri
 `npm run tauri dev`
