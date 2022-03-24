@@ -6,7 +6,10 @@ A task runner to make managing your day-to-day life that much easier.
 ## Features
 
 - [x] Run user-defined workflows, launching applications and URLs
-- [x] Web Search for Duck Duck Go, Stack Overflow and Google
+- [x] Web Search
+    - `d?` Duck Duck Go
+    - `so?` Stack Overflow
+    - `g?` Google
 - [x] Calculator
 
 ### Roadmap
