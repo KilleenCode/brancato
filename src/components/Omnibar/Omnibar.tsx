@@ -5,7 +5,8 @@ import { AppEvents, getConfig } from "../../utils";
 import createWorkflowSource from "./workflow-source";
 import createSettingsSource from "./settings-source";
 import createWebSearchSource, { searchEngines } from "./websearch-source";
-
+import mexp from "math-expression-evaluator";
+import createCalculatorSource from "./math-source";
 const focusSearchBar = () => {
   let input = document.querySelector(".aa-Input") as HTMLElement | null;
   input?.focus();
@@ -75,7 +76,29 @@ const Omnibar = () => {
           openOnFocus
           autoFocus
           defaultActiveItemId={0}
-          getSources={({ query }: { query: string }) => {
+          getSources={({
+            query,
+            refresh,
+          }: {
+            query: string;
+            refresh: () => void;
+          }) => {
+            const searchEngineCodes = searchEngines.map((se) => se.shortCode);
+            const isWebSearch =
+              query.includes("?") &&
+              searchEngineCodes.some((v: string) => query.includes(v));
+            let isMath;
+
+            try {
+              isMath = mexp.eval(query);
+            } catch (e) {}
+
+            if (isMath) {
+              return [
+                createCalculatorSource({ query, calculated: isMath, refresh }),
+              ];
+            }
+
             const pattern = getQueryPattern(query);
             const webSearchSource = createWebSearchSource({ query });
             const defaultSources = [
@@ -83,12 +106,12 @@ const Omnibar = () => {
               createSettingsSource({ pattern }),
               webSearchSource,
             ];
-            const searchEngineCodes = searchEngines.map((se) => se.shortCode);
-            const isWebSearch =
-              query.includes("?") &&
-              searchEngineCodes.some((v: string) => query.includes(v));
 
-            return isWebSearch ? [webSearchSource] : defaultSources;
+            if (isWebSearch) {
+              return [webSearchSource];
+            }
+
+            return defaultSources;
           }}
         />
       </form>
