@@ -51,7 +51,11 @@
       }
     },
     "updater": {
-      "active": false
+      "active": true,
+      "endpoints": [
+        "https://tauri-update-cloudflare-1.rykilleen.workers.dev/{{target}}/{{current_version}}"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDk3Mjc0OTE1MTIxMEJCQjAKUldTd3V4QVNGVWtubDdoU013UUpoUFRFeUEwdmRBNFV3dzJWMFNteWhDTDA1ZE40eE1mc2hCZ0cK"
     },
     "allowlist": {
       "all": true
