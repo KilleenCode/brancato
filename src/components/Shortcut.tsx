@@ -3,6 +3,7 @@ import hotkeys from "hotkeys-js";
 import keycode from "keycode";
 import { useEffect, useState } from "react";
 import { Commands, getConfig } from "../utils";
+import Button, { ButtonContainer } from "./core/button";
 
 const Shortcut = () => {
   const [shortcut, setShortcut] = useState<string | undefined>();
@@ -38,23 +39,37 @@ const Shortcut = () => {
 
   return (
     <div>
+      <h3>Shortcut</h3>
       <p>
-        Shortcut: <code>{shortcut}</code>
+        <code>{shortcut}</code>
       </p>
-      <div>
+      {editingShortcut && <p>Begin typing your shortcut commands</p>}
+      <ButtonContainer>
         {!editingShortcut && (
-          <button
+          <Button
             onClick={() => {
               setListenForKeys(!listenForKeys);
               setEditingShortcut(true);
             }}
           >
             Edit
-          </button>
+          </Button>
         )}
-        {editingShortcut && <p>Begin typing your shortcut commands</p>}
-        {editingShortcut && <button onClick={onSave}>Save</button>}
-      </div>
+
+        {editingShortcut && (
+          <>
+            <Button appearance="success" onClick={onSave}>
+              Save
+            </Button>
+            <Button
+              appearance="secondary"
+              onClick={() => setEditingShortcut(false)}
+            >
+              Cancel
+            </Button>
+          </>
+        )}
+      </ButtonContainer>
     </div>
   );
 };

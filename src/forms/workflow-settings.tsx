@@ -33,9 +33,15 @@ const WorkflowSettings = () => {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <WorkflowArray
-        {...{ control, register, defaultValues, getValues, setValue }}
+        {...{
+          control,
+          register,
+          defaultValues,
+          getValues,
+          setValue,
+          isSubmitting,
+        }}
       />
-      <button disabled={isSubmitting}>Save</button>
     </form>
   );
 };
