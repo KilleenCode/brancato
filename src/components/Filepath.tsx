@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api";
 import { useEffect, useState } from "react";
 import { AppState, Commands, getConfig } from "../utils";
+import Button from "./core/button";
 const Filepath = () => {
   const [appState, setAppState] = useState<AppState | undefined>();
 
@@ -20,7 +21,9 @@ const Filepath = () => {
         Config Path: <b>{appState?.app_config.user_config_path}</b>
       </label>
       <div>
-        <button onClick={updateConfigPath}>Set custom config file path</button>
+        <Button appearance="danger" onClick={updateConfigPath}>
+          Set custom config file path
+        </Button>
       </div>
     </>
   );

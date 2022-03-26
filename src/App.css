@@ -51,11 +51,6 @@ div.inline-logo .smaller {
   list-style: none;
 }
 
-.App-header label {
-  font-size: 1rem;
-  margin-right: 6px;
-}
-
 .App-link {
   color: #61dafb;
   margin-bottom: 5vh;
@@ -68,11 +63,6 @@ div.inline-logo .smaller {
   to {
     transform: rotate(360deg);
   }
-}
-
-.workflow {
-  padding: 1rem;
-  border-bottom: 1px solid white;
 }
 
 #root {

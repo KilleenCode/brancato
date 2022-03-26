@@ -1,8 +1,13 @@
 import "./App.css";
 import Shortcut from "./components/Shortcut";
-import * as Tabs from "@radix-ui/react-tabs";
 import WorkflowSettings from "./forms/workflow-settings";
 import Filepath from "./components/Filepath";
+import {
+  TabContainer,
+  TabContent,
+  TabTrigger,
+  TabTriggerContainer,
+} from "./components/core/Tabs";
 
 export type Workflow = {
   name: string;
@@ -30,24 +35,24 @@ function Config() {
   return (
     <div className="App">
       <header className="App-header">
-        <Tabs.Root defaultValue={TabSections.WorkflowSettings}>
-          <Tabs.List>
-            <Tabs.Trigger value={TabSections.WorkflowSettings}>
+        <TabContainer defaultValue={TabSections.WorkflowSettings}>
+          <TabTriggerContainer>
+            <TabTrigger value={TabSections.WorkflowSettings}>
               {TabSections.WorkflowSettings}
-            </Tabs.Trigger>
-            <Tabs.Trigger value={TabSections.Preferences}>
+            </TabTrigger>
+            <TabTrigger value={TabSections.Preferences}>
               {TabSections.Preferences}
-            </Tabs.Trigger>
-          </Tabs.List>
-          <Tabs.Content value={TabSections.WorkflowSettings}>
+            </TabTrigger>
+          </TabTriggerContainer>
+          <TabContent value={TabSections.WorkflowSettings}>
             <WorkflowSettings />
-          </Tabs.Content>
-          <Tabs.Content value={TabSections.Preferences}>
+          </TabContent>
+          <TabContent value={TabSections.Preferences}>
             <Shortcut />
             <hr />
             <Filepath />
-          </Tabs.Content>
-        </Tabs.Root>
+          </TabContent>
+        </TabContainer>
       </header>
     </div>
   );
