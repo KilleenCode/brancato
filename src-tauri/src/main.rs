@@ -7,7 +7,6 @@ mod app_config;
 mod user_config;
 mod windows;
 mod workflows;
-
 use app_config::{set_custom_user_config_path, AppConfig};
 use serde::Serialize;
 use std::{path::PathBuf, sync::Mutex};
@@ -187,7 +186,9 @@ fn open_omnibar(app: &AppHandle) -> Result<(), tauri::Error> {
 
   Ok(())
 }
+
 fn main() {
+  pretty_env_logger::init();
   let app_config = app_config::get_or_create_app_config();
   let user_config = user_config::get_user_config(app_config.user_config_path.clone());
 
