@@ -1,6 +1,6 @@
 {
   "name": "brancato",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "private": true,
   "dependencies": {
     "@algolia/autocomplete-js": "^1.5.3",
