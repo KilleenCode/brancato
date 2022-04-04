@@ -8,11 +8,13 @@ mod user_config;
 mod windows;
 mod workflows;
 use app_config::{set_custom_user_config_path, AppConfig};
+use auto_launch::{AutoLaunch, AutoLaunchBuilder};
 use serde::Serialize;
 use std::{path::PathBuf, sync::Mutex};
 use tauri::{
-  api::dialog::blocking::FileDialogBuilder, AppHandle, CustomMenuItem, GlobalShortcutManager,
-  Manager, RunEvent, State, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
+  api::dialog::blocking::FileDialogBuilder, utils::platform::current_exe, AppHandle,
+  CustomMenuItem, GlobalShortcutManager, Manager, RunEvent, State, SystemTray, SystemTrayEvent,
+  SystemTrayMenu, SystemTrayMenuItem,
 };
 
 use user_config::{set_user_config, UserConfig};
@@ -187,8 +189,22 @@ fn open_omnibar(app: &AppHandle) -> Result<(), tauri::Error> {
   Ok(())
 }
 
+pub fn init_autolaunch() -> AutoLaunch {
+  let app_exe = current_exe().unwrap();
+  let app_exe = dunce::canonicalize(app_exe).unwrap();
+  let app_name = app_exe.file_stem().unwrap().to_str().unwrap();
+  let app_path = app_exe.as_os_str().to_str().unwrap();
+
+  AutoLaunchBuilder::new()
+    .set_app_name(app_name)
+    .set_app_path(app_path)
+    .build()
+}
+
 fn main() {
   pretty_env_logger::init();
+  let autolaunch = init_autolaunch();
+  autolaunch.enable().unwrap();
   let app_config = app_config::get_or_create_app_config();
   let user_config = user_config::get_user_config(app_config.user_config_path.clone());
 
