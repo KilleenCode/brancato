@@ -284,11 +284,14 @@ fn main() {
         .expect("Couldn't create shortcut");
     }
 
-    // // Triggered when a window is trying to close
-    RunEvent::CloseRequested { label, api, .. } => {
-      api.prevent_close();
-      let _ = &app_handle.get_window(&label).unwrap().hide().unwrap();
-    }
+    // Triggered when a window is trying to close
+    RunEvent::WindowEvent { label, event, .. } => match event {
+      tauri::WindowEvent::CloseRequested { api, .. } => {
+        api.prevent_close();
+        let _ = &app_handle.get_window(&label).unwrap().hide().unwrap();
+      }
+      _ => {}
+    },
 
     // Keep the event loop running even if all windows are closed
     // This allow us to catch system tray events when there is no window
