@@ -9,6 +9,7 @@ mod windows;
 mod workflows;
 use app_config::{set_custom_user_config_path, AppConfig};
 use auto_launch::{AutoLaunch, AutoLaunchBuilder};
+use rayon::prelude::*;
 use serde::Serialize;
 use std::{path::PathBuf, sync::Mutex};
 use tauri::{
@@ -130,17 +131,14 @@ fn set_user_config_path(app_config_state: State<Mutex<AppConfig>>) -> Option<Pat
 
 #[tauri::command]
 async fn run_workflow(state: State<'_, Mutex<UserConfig>>, label: String) -> Result<(), ()> {
-  let current_state = state.lock().expect("Can't unlock").clone();
+  let workflows = state.lock().expect("Can't unlock").clone().workflows;
 
-  let mut workflow = current_state
-    .workflows
+  workflows
     .into_iter()
     .find(|x| x.name == label)
-    .expect("Couldn't find workflow");
-
-  let _ = &workflow
+    .expect("Couldn't find workflow")
     .steps
-    .iter_mut()
+    .par_iter_mut()
     .for_each(|step| run_step(&step.value));
 
   Ok(())
