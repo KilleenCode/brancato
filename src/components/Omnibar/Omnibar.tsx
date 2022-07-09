@@ -7,6 +7,7 @@ import createSettingsSource from "./settings-source";
 import createWebSearchSource, { searchEngines } from "./websearch-source";
 import mexp from "math-expression-evaluator";
 import createCalculatorSource from "./math-source";
+import { UnlistenFn } from "@tauri-apps/api/event";
 const focusSearchBar = () => {
   let input = document.querySelector(".aa-Input") as HTMLElement | null;
   input?.focus();
@@ -49,18 +50,21 @@ const Omnibar = () => {
     setSuggestions(state.user_config.workflows.map((wf) => wf.name));
   }
   useEffect(() => {
-    const unlisten1 = appWindow.listen(
-      AppEvents.OmnibarFocused,
-      focusSearchBar
-    );
-    const unlisten2 = appWindow.listen(
-      AppEvents.AppStateUpdated,
-      setStoredConfigChoices
-    );
+    async function getWindowEvents() {
+      return [
+        await appWindow.listen(AppEvents.OmnibarFocused, focusSearchBar),
+        await appWindow.listen(
+          AppEvents.AppStateUpdated,
+          setStoredConfigChoices
+        ),
+      ];
+    }
+
+    let unlistens: UnlistenFn[];
+    getWindowEvents().then((res) => (unlistens = res));
 
     return () => {
-      unlisten1();
-      unlisten2();
+      unlistens.forEach((unlisten) => unlisten());
     };
   }, []);
 
