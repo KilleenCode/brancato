@@ -27,6 +27,7 @@ log = "0.4"
 pretty_env_logger = "0.4"
 auto-launch = "0.2"
 dunce = "1.0.2"
+rayon = "1.5.3"
 
 [features]
 # by default Tauri runs in production mode
