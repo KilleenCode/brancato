@@ -6,9 +6,10 @@ on:
 
 jobs:
   publish-tauri:
+    continue-on-error: ${{ matrix.continueOnError }}
     strategy:
       fail-fast: false
-      continue-on-error: ${{ matrix.continueOnError }}
+
       matrix:
         platform: [macos-latest, ubuntu-latest, windows-latest]
         include:
