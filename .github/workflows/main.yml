@@ -8,8 +8,13 @@ jobs:
   publish-tauri:
     strategy:
       fail-fast: false
+      continue-on-error: { { matrix.continueOnError } }
       matrix:
         platform: [macos-latest, ubuntu-latest, windows-latest]
+        include:
+          - continueOnError: false
+          - platform: macos-latest
+            continueOnError: true
 
     runs-on: ${{ matrix.platform }}
     steps:
