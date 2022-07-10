@@ -6,10 +6,9 @@ on:
 
 jobs:
   publish-tauri:
-    continue-on-error: ${{ matrix.continueOnError }}
+    continue-on-error: true
     strategy:
       fail-fast: false
-
       matrix:
         platform: [macos-latest, ubuntu-latest, windows-latest]
         include:
@@ -51,6 +50,7 @@ jobs:
       - name: install app dependencies and build it
         run: npm install && npm run build
       - uses: tauri-apps/tauri-action@v0
+        args: --verbose
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ENABLE_CODE_SIGNING: ${{ secrets.APPLE_CERTIFICATE }}
