@@ -8,8 +8,9 @@ import createWebSearchSource, { searchEngines } from "./websearch-source";
 import mexp from "math-expression-evaluator";
 import createCalculatorSource from "./math-source";
 import { UnlistenFn } from "@tauri-apps/api/event";
+
 const focusSearchBar = () => {
-  let input = document.querySelector(".aa-Input") as HTMLElement | null;
+  let input = document.querySelector<HTMLInputElement>(".aa-Input");
   input?.focus();
 };
 
