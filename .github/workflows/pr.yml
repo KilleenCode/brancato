@@ -3,6 +3,7 @@ on: [pull_request]
 
 jobs:
   publish-tauri:
+    if: ${{ github.actor != 'dependabot[bot]' }}
     strategy:
       fail-fast: false
       matrix:
