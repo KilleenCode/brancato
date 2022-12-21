@@ -49,10 +49,10 @@ fn save_user_config(
   state: State<Mutex<UserConfig>>,
   app: AppHandle,
   config: UserConfig,
-) -> Result<(), tauri::Error> {
+) -> Result<&str, tauri::Error> {
   update_user_config_and_state(&app, state, config).ok();
 
-  Ok(())
+  Ok("Success!".into())
 }
 
 #[tauri::command]
@@ -130,12 +130,18 @@ fn set_user_config_path(app_config_state: State<Mutex<AppConfig>>) -> Option<Pat
 }
 
 #[tauri::command]
-async fn run_workflow(state: State<'_, Mutex<UserConfig>>, label: String) -> Result<(), ()> {
+async fn run_workflow(
+  state: State<'_, Mutex<UserConfig>>,
+  name: String,
+  args: Vec<String>,
+) -> Result<(), ()> {
   let workflows = state.lock().expect("Can't unlock").clone().workflows;
+  print!("{:?}", workflows);
+  print!("{:?}", args);
 
   workflows
     .into_iter()
-    .find(|x| x.name == label)
+    .find(|x| x.name == name)
     .expect("Couldn't find workflow")
     .steps
     .par_iter_mut()

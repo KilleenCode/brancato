@@ -1,7 +1,7 @@
 import { autocomplete } from '@algolia/autocomplete-js';
 import React, { createElement, Fragment, useEffect, useRef } from 'react';
 import { render } from 'react-dom';
-import "@algolia/autocomplete-theme-classic";
+
 import { appWindow } from '@tauri-apps/api/window';
 
 export const Action = ({ hit }) => {
@@ -63,5 +63,9 @@ export function Autocomplete(props) {
     };
   }, [props, containerRef]);
 
-  return <div ref={containerRef} onKeyDown={handleEscape}/>;
+  return <div ref={containerRef} onKeyDown={(e) => {
+    if (e.key === 'Escape') {
+      appWindow.hide()
+    }
+  }}/>;
 }

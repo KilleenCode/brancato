@@ -11,6 +11,7 @@ pub struct Step {
 pub struct Workflow {
   pub name: String,
   pub steps: Vec<Step>,
+  pub arguments: Option<Vec<String>>,
 }
 
 // On Windows, some apps expect a relative working directory (Looking at you, OBS....)

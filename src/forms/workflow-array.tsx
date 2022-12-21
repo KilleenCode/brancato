@@ -1,4 +1,4 @@
-import { useFieldArray, useForm } from "react-hook-form";
+import { useController, useFieldArray, useForm, useFormContext } from "react-hook-form";
 import Button, { ButtonContainer } from "../components/core/button";
 import { Input, InputContainer, InputLabel } from "../components/core/input";
 import { defaultWorkflow } from "../Config";
@@ -9,18 +9,13 @@ export type NestedInputProps = Pick<
   ReturnType<typeof useForm>,
   "control" | "register" | "getValues" | "setValue"
 >;
-export default function WorkflowArray({
-  control,
-  register,
-  getValues,
-  setValue,
-  isSubmitting,
-}: any) {
+export default function WorkflowArray() {
   const { fields, prepend, remove } = useFieldArray({
-    control,
+
     name: "workflows",
   });
 
+  const { register, getValues, control, setValue, formState: { isSubmitting } } = useFormContext()
   return (
     <WorkflowColumns>
       <EndColumn>
@@ -46,6 +41,11 @@ export default function WorkflowArray({
                 <InputLabel>Name</InputLabel>
                 <Input {...register(`workflows.${index}.name`)} />
               </InputContainer>
+              <InputContainer>
+                <InputLabel>Arguments (optional)</InputLabel>
+                <p style={{ margin: 0, padding: 0, fontSize: '0.8rem' }}>A comma-separated list of argument names, to start</p>
+                <StringArrayInput name={`workflows.${index}.arguments`} />
+              </InputContainer>
               <WorkflowAction
                 nestIndex={index}
                 {...{ control, register, getValues, setValue }}
@@ -57,6 +57,20 @@ export default function WorkflowArray({
       </ul>
     </WorkflowColumns>
   );
+}
+
+const StringArrayInput = ({ name }: { name: string }) => {
+  const { field: { onChange, ...field } } = useController({
+    name: name
+  })
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.split(',').map(e => e.trim())
+    onChange(value)
+  }
+
+  return <Input {...field} onChange={handleChange} />
+
 }
 
 const WorkflowColumns = styled("div", {
