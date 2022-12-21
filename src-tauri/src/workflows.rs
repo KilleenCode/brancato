@@ -1,6 +1,6 @@
 extern crate open;
 use serde::{Deserialize, Serialize};
-use std::{env, path::Path};
+use std::{collections::HashMap, env, path::Path};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Step {
@@ -22,7 +22,7 @@ pub fn open_app(path: &str) {
   open::that(path).expect("Dang")
 }
 
-pub fn run_step(path: &str) {
+pub fn run_step(path: &str, args: Option<HashMap<String, String>>) {
   if path.contains("http://") || path.contains("https://") {
     open::that_in_background(&path);
   } else {

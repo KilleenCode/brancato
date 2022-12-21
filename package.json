@@ -57,6 +57,6 @@
   },
   "devDependencies": {
     "@hookform/devtools": "^4.0.2",
-    "@tauri-apps/cli": "^1.1.1"
+    "@tauri-apps/cli": "^1.2.2"
   }
 }

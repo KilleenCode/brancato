@@ -4,11 +4,13 @@ import { Workflow } from "../../Config";
 import { Commands, getConfig } from "../../utils";
 import { Action } from "../Autocomplete";
 
-
-type WorkflowResult = Workflow & { label: string }
-const handleRunWorkflow = async (workflow: Workflow, args: string[] = []) => {
-  console.log(workflow, args)
-  invoke(Commands.RunWorkflow, { name: workflow.name, args });
+type WorkflowResult = Workflow & { label: string };
+const handleRunWorkflow = async (
+  workflow: Workflow,
+  args: Record<string, any> = {}
+) => {
+  console.log("handleRunWorkflow", { workflow, args });
+  invoke(Commands.RunWorkflow, { name: workflow.name, args: args });
 };
 
 const createWorkflowSource = ({
@@ -22,8 +24,8 @@ const createWorkflowSource = ({
   },
   async getItems({ state, ...rest }: { state: any }) {
     const config = await getConfig();
-    const { workflows } = config.user_config
-    console.log('state', { state, rest, workflows })
+    const { workflows } = config.user_config;
+
     return workflows
       .filter((workflow) => pattern.test(workflow.name))
       .map((w) => {
@@ -31,8 +33,7 @@ const createWorkflowSource = ({
           ...w,
           label: w.name,
         };
-      })
-
+      });
   },
   // Run this code when item is selected
   onSelect(params) {
@@ -41,16 +42,16 @@ const createWorkflowSource = ({
     const { item, setQuery, setContext, setCollections, ...rest } = params;
     if (item.arguments) {
       setContext({
-        searchPrefix: item.arguments[0], workflow: item, onComplete: (query: string, args?: string[]) => {
-          console.log(item, query, args)
-          handleRunWorkflow(item, args)
-        }
-      })
-      console.log('do var workflow', { item, rest })
-      setCollections([])
+        searchPrefix: item.arguments[0],
+        workflow: item,
+        onComplete: (args: Record<string, any>) => {
+          console.log('onComplete', args);
+          handleRunWorkflow(item, args);
+        },
+      });
+      setCollections([]);
       setQuery("");
     } else {
-
       handleRunWorkflow(item);
       setQuery("");
     }

@@ -23,14 +23,16 @@ function Autocomplete({ getSources }) {
     []
   );
 
-  console.log({ autocompleteState });
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        console.log({ e, autocompleteState });
+        const argValue = {
+          [autocompleteState.context.searchPrefix]: autocompleteState.query,
+        };
+        console.log("argValue", argValue);
         autocompleteState.context.onComplete &&
-          autocompleteState.context.onComplete(autocompleteState.query);
+          autocompleteState.context.onComplete(argValue);
       }}
     >
       <div

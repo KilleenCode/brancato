@@ -11,7 +11,7 @@ use app_config::{set_custom_user_config_path, AppConfig};
 use auto_launch::{AutoLaunch, AutoLaunchBuilder};
 use rayon::prelude::*;
 use serde::Serialize;
-use std::{path::PathBuf, sync::Mutex};
+use std::{collections::HashMap, path::PathBuf, sync::Mutex};
 use tauri::{
   api::dialog::blocking::FileDialogBuilder, utils::platform::current_exe, AppHandle,
   CustomMenuItem, GlobalShortcutManager, Manager, RunEvent, State, SystemTray, SystemTrayEvent,
@@ -133,11 +133,11 @@ fn set_user_config_path(app_config_state: State<Mutex<AppConfig>>) -> Option<Pat
 async fn run_workflow(
   state: State<'_, Mutex<UserConfig>>,
   name: String,
-  args: Vec<String>,
+  args: HashMap<String, String>,
 ) -> Result<(), ()> {
   let workflows = state.lock().expect("Can't unlock").clone().workflows;
-  print!("{:?}", workflows);
-  print!("{:?}", args);
+
+  println!("{:?}", args);
 
   workflows
     .into_iter()
