@@ -137,7 +137,7 @@ async fn run_workflow(
 ) -> Result<(), ()> {
   let workflows = state.lock().expect("Can't unlock").clone().workflows;
 
-  println!("{:?}", args);
+  // println!("{:?}", args);
 
   workflows
     .into_iter()
@@ -145,7 +145,10 @@ async fn run_workflow(
     .expect("Couldn't find workflow")
     .steps
     .par_iter_mut()
-    .for_each(|step| run_step(&step.value));
+    .for_each(|step| {
+      let copy = args.clone();
+      run_step(&step.value, Some(copy))
+    });
 
   Ok(())
 }

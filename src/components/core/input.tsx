@@ -17,6 +17,7 @@ export const InputLabel = styled("label", {
 });
 
 export const Input = styled("input", inputSpacing, {
+  width: '100%',
   maxWidth: "250px",
   border: "0",
 });

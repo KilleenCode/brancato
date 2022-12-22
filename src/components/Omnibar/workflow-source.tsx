@@ -2,7 +2,7 @@ import { AutocompleteSource } from "@algolia/autocomplete-js";
 import { invoke } from "@tauri-apps/api";
 import { Workflow } from "../../Config";
 import { Commands, getConfig } from "../../utils";
-import { Action } from "../Autocomplete";
+import { Action } from "./Action";
 
 type WorkflowResult = Workflow & { label: string };
 const handleRunWorkflow = async (
@@ -32,6 +32,7 @@ const createWorkflowSource = ({
         return {
           ...w,
           label: w.name,
+          description: w.arguments ? "Arguments: " + w.arguments.join(', ') : "",
         };
       });
   },
@@ -39,13 +40,15 @@ const createWorkflowSource = ({
   onSelect(params) {
     // item is the full item data
     // setQuery is a hook to set the query state
-    const { item, setQuery, setContext, setCollections, ...rest } = params;
+    const { item, setQuery, setContext, setCollections } = params;
     if (item.arguments) {
       setContext({
         searchPrefix: item.arguments[0],
         workflow: item,
         onComplete: (args: Record<string, any>) => {
           console.log('onComplete', args);
+          setQuery("");
+          setContext({ searchPrefix: null });
           handleRunWorkflow(item, args);
         },
       });

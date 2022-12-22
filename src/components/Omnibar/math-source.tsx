@@ -1,5 +1,5 @@
 import { AutocompleteSource } from "@algolia/autocomplete-js";
-import { Action } from "../Autocomplete";
+import { Action } from "./Action";
 
 const createCalculatorSource = ({
   query,
@@ -30,7 +30,7 @@ const createCalculatorSource = ({
   // Templates for Header of this source and Items in this source
   templates: {
     header() {
-      return <h2>{calculated}</h2>;
+      return <h3>{calculated}</h3>;
     },
     item({ item }: { item: any }) {
       return <Action hit={item} />;

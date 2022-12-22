@@ -23,9 +23,16 @@ pub fn open_app(path: &str) {
 }
 
 pub fn run_step(path: &str, args: Option<HashMap<String, String>>) {
-  if path.contains("http://") || path.contains("https://") {
-    open::that_in_background(&path);
+  let mut target = path.to_string();
+  if let Some(args) = args {
+    for (key, value) in args {
+      target = target.replace(&format!("${}", key), &value);
+    }
+  }
+  println!("target: {:?}", &target);
+  if target.contains("http://") || target.contains("https://") {
+    open::that_in_background(&target);
   } else {
-    open_app(&path);
+    open_app(&target);
   }
 }

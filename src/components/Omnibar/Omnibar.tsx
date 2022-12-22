@@ -1,30 +1,14 @@
 import { appWindow } from "@tauri-apps/api/window";
-import { NewLifecycle, useEffect, useState } from "react";
-import { Autocomplete } from "../Autocomplete";
-import { AppEvents, getConfig } from "../../utils";
+import { useEffect } from "react";
+import { AppEvents } from "../../utils";
 import createWorkflowSource from "./workflow-source";
 import createSettingsSource from "./settings-source";
 import createWebSearchSource, { searchEngines } from "./websearch-source";
 import mexp from "math-expression-evaluator";
 import createCalculatorSource from "./math-source";
 import { UnlistenFn } from "@tauri-apps/api/event";
-import { Workflow } from "../../Config";
 import "@algolia/autocomplete-theme-classic";
-// function highlight(text: string, pattern: RegExp) {
-//   // Split the text based on the pattern
-//   const tokens = text.split(pattern);
 
-//   // Map over the split text and test against the pattern
-//   return tokens.map((token) => {
-//     // If the pattern matches the text, wrap the text in <mark>
-//     if (!pattern.test("") && pattern.test(token)) {
-//       return <mark>{token}</mark>;
-//     }
-
-//     // return the token back to the array
-//     return token;
-//   });
-// }
 import NewAutocomplete from "../NewAutocomplete";
 
 const focusSearchBar = () => {
@@ -46,22 +30,10 @@ function getQueryPattern(query: string, flags = "i") {
   return pattern;
 }
 const Omnibar = () => {
-  const [workflows, setWorkflows] = useState<Workflow[]>([]);
-  async function setStoredConfigChoices() {
-    let state = await getConfig();
-    setWorkflows(state.user_config.workflows);
-  }
-
   useEffect(() => {
-    async function getWindowEvents() {
-      return [
-        await appWindow.listen(AppEvents.OmnibarFocused, focusSearchBar),
-        await appWindow.listen(
-          AppEvents.AppStateUpdated,
-          setStoredConfigChoices
-        ),
-      ];
-    }
+    const getWindowEvents = async () => [
+      await appWindow.listen(AppEvents.OmnibarFocused, focusSearchBar),
+    ];
 
     let unlistens: UnlistenFn[];
     getWindowEvents().then((res) => (unlistens = res));
@@ -71,17 +43,13 @@ const Omnibar = () => {
     };
   }, []);
 
-  useEffect(() => {
-    setStoredConfigChoices();
-  }, []);
-
   return (
-    <div style={{ background: "rgb(0 0 0 / 0%)" }}>
-
-      <NewAutocomplete
-        getSources={getSources}
-      />
-
+    <div
+      style={{
+        background: "rgb(0 0 0 / 0%)",
+      }}
+    >
+      <NewAutocomplete getSources={getSources} />
     </div>
   );
 };

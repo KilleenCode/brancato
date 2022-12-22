@@ -1,7 +1,7 @@
 import { AutocompleteSource } from "@algolia/autocomplete-js";
 import { shell } from "@tauri-apps/api";
 import { ReactNode } from "react";
-import { Action } from "../Autocomplete";
+import { Action } from "./Action";
 
 type SearchEngineResult = {
   label: string;
@@ -78,7 +78,7 @@ const createWebSearchSource = ({
   // Templates for Header of this source and Items in this source
   templates: {
     header() {
-      return <h2>Web Search</h2>;
+      return <h3>Web Search</h3>;
     },
     item({ item }: { item: any }) {
       return <Action hit={item} />;
