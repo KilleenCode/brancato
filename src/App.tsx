@@ -10,7 +10,6 @@ function App() {
       {settingsPage && <Config />}
 
       {!settingsPage && <Omnibar />}
-
     </>
   );
 }

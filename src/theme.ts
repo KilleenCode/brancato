@@ -1,6 +1,6 @@
 import { createStitches, CSS as StitchesCSS } from "@stitches/react";
 import { tomatoDark, mauveDark, violetDark, grassDark } from "@radix-ui/colors";
-export const { styled, css, globalCss, config } = createStitches({
+export const { styled, css, globalCss, config, keyframes } = createStitches({
   theme: {
     colors: {
       hiContrast: "hsl(206,10%,5%)",
