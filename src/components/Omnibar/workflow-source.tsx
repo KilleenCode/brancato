@@ -1,50 +1,70 @@
 import { AutocompleteSource } from "@algolia/autocomplete-js";
 import { invoke } from "@tauri-apps/api";
-import { Commands } from "../../utils";
-import { Action } from "../Autocomplete";
+import { Workflow } from "../../Config";
+import { Commands, getConfig } from "../../utils";
+import { Action } from "./Action";
 
-type WorkflowResult = {
-  label: string;
-};
-const handleRunWorkflow = async (label: string) => {
-  invoke(Commands.RunWorkflow, { label });
+type WorkflowResult = Workflow & { label: string };
+const handleRunWorkflow = async (
+  workflow: Workflow,
+  args: Record<string, any> = {}
+) => {
+  console.log("handleRunWorkflow", { workflow, args });
+  invoke(Commands.RunWorkflow, { name: workflow.name, args: args });
 };
 
 const createWorkflowSource = ({
-  suggestions,
   pattern,
 }: {
-  suggestions: string[];
   pattern: RegExp;
 }): AutocompleteSource<WorkflowResult> => ({
   sourceId: "workflows",
   getItemInputValue({ item }: { item: any }) {
-    return item.label;
+    return item.name;
   },
-  getItems({ state }: { state: any }) {
-    return suggestions
-      .filter((label) => pattern.test(label))
+  async getItems({ state, ...rest }: { state: any }) {
+    const config = await getConfig();
+    const { workflows } = config.user_config;
 
-      .map((sug) => ({
-        label: sug,
-        // highlighted: highlight(sug, pattern),
-      }));
+    return workflows
+      .filter((workflow) => pattern.test(workflow.name))
+      .map((w) => {
+        return {
+          ...w,
+          label: w.name,
+          description: w.arguments ? "Arguments: " + w.arguments.join(', ') : "",
+        };
+      });
   },
   // Run this code when item is selected
-  onSelect(params: any) {
+  onSelect(params) {
     // item is the full item data
     // setQuery is a hook to set the query state
-    const { item, setQuery } = params;
-
-    handleRunWorkflow(item.label);
-    setQuery("");
+    const { item, setQuery, setContext, setCollections } = params;
+    if (item.arguments) {
+      setContext({
+        searchPrefix: item.arguments[0],
+        workflow: item,
+        onComplete: (args: Record<string, any>) => {
+          console.log('onComplete', args);
+          setQuery("");
+          setContext({ searchPrefix: null });
+          handleRunWorkflow(item, args);
+        },
+      });
+      setCollections([]);
+      setQuery("");
+    } else {
+      handleRunWorkflow(item);
+      setQuery("");
+    }
   },
   // Templates for Header of this source and Items in this source
   templates: {
     header() {
       return <h2>Workflows</h2>;
     },
-    item({ item }: { item: any }) {
+    item({ item }: { item: WorkflowResult }) {
       return <Action hit={item} />;
     },
   },

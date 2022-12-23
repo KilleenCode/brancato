@@ -1,4 +1,10 @@
-import { useFieldArray, useForm } from "react-hook-form";
+import * as Popover from "../components/core/popover";
+import {
+  useController,
+  useFieldArray,
+  useForm,
+  useFormContext,
+} from "react-hook-form";
 import Button, { ButtonContainer } from "../components/core/button";
 import { Input, InputContainer, InputLabel } from "../components/core/input";
 import { defaultWorkflow } from "../Config";
@@ -9,18 +15,18 @@ export type NestedInputProps = Pick<
   ReturnType<typeof useForm>,
   "control" | "register" | "getValues" | "setValue"
 >;
-export default function WorkflowArray({
-  control,
-  register,
-  getValues,
-  setValue,
-  isSubmitting,
-}: any) {
+export default function WorkflowArray() {
   const { fields, prepend, remove } = useFieldArray({
-    control,
     name: "workflows",
   });
 
+  const {
+    register,
+    getValues,
+    control,
+    setValue,
+    formState: { isSubmitting },
+  } = useFormContext();
   return (
     <WorkflowColumns>
       <EndColumn>
@@ -46,6 +52,24 @@ export default function WorkflowArray({
                 <InputLabel>Name</InputLabel>
                 <Input {...register(`workflows.${index}.name`)} />
               </InputContainer>
+              <InputContainer>
+                <InputLabel>
+                  Arguments (optional)
+                  <Popover.Root>
+                    <Popover.InfoTrigger />
+                    <Popover.Portal>
+                      <Popover.Content>
+                        <Description>
+                          Comma-separated list of argument names, to be used in
+                          paths prefixed with $
+                        </Description>
+                        <Popover.Arrow />
+                      </Popover.Content>
+                    </Popover.Portal>
+                  </Popover.Root>
+                </InputLabel>
+                <StringArrayInput name={`workflows.${index}.arguments`} />
+              </InputContainer>
               <WorkflowAction
                 nestIndex={index}
                 {...{ control, register, getValues, setValue }}
@@ -58,6 +82,28 @@ export default function WorkflowArray({
     </WorkflowColumns>
   );
 }
+
+const Description = styled("p", {
+  margin: 0,
+  marginBottom: "0.5rem",
+  padding: 0,
+  fontSize: "0.8rem",
+});
+
+const StringArrayInput = ({ name }: { name: string }) => {
+  const {
+    field: { onChange, ...field },
+  } = useController({
+    name: name,
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.split(",").map((e) => e.trim());
+    onChange(value);
+  };
+
+  return <Input {...field} onChange={handleChange} />;
+};
 
 const WorkflowColumns = styled("div", {
   display: "grid",

@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api";
 import { Commands } from "../../utils";
-import { Action } from "../Autocomplete";
+import { Action } from "./Action";
 
 const createSettingsSource = ({ pattern }: { pattern: RegExp }) => ({
   sourceId: "settings",
@@ -29,7 +29,7 @@ const createSettingsSource = ({ pattern }: { pattern: RegExp }) => ({
   // Templates for Header of this source and Items in this source
   templates: {
     header() {
-      return <h2>Settings</h2>;
+      return <h3>Settings</h3>;
     },
     item({ item }: { item: any }) {
       return <Action hit={item} />;

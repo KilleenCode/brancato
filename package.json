@@ -3,9 +3,12 @@
   "version": "0.11.0",
   "private": true,
   "dependencies": {
-    "@algolia/autocomplete-js": "^1.7.1",
+    "@algolia/autocomplete-core": "^1.7.4",
+    "@algolia/autocomplete-js": "^1.7.4",
     "@algolia/autocomplete-theme-classic": "^1.7.1",
     "@radix-ui/colors": "^0.1.8",
+    "@radix-ui/react-icons": "^1.1.1",
+    "@radix-ui/react-popover": "^1.0.2",
     "@radix-ui/react-tabs": "^0.1.5",
     "@stitches/react": "^1.2.7",
     "@tauri-apps/api": "^1.1.0",
@@ -56,6 +59,6 @@
   },
   "devDependencies": {
     "@hookform/devtools": "^4.0.2",
-    "@tauri-apps/cli": "^1.1.1"
+    "@tauri-apps/cli": "^1.2.2"
   }
 }

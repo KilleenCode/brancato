@@ -11,7 +11,7 @@ use app_config::{set_custom_user_config_path, AppConfig};
 use auto_launch::{AutoLaunch, AutoLaunchBuilder};
 use rayon::prelude::*;
 use serde::Serialize;
-use std::{path::PathBuf, sync::Mutex};
+use std::{collections::HashMap, path::PathBuf, sync::Mutex};
 use tauri::{
   api::dialog::blocking::FileDialogBuilder, utils::platform::current_exe, AppHandle,
   CustomMenuItem, GlobalShortcutManager, Manager, RunEvent, State, SystemTray, SystemTrayEvent,
@@ -49,10 +49,10 @@ fn save_user_config(
   state: State<Mutex<UserConfig>>,
   app: AppHandle,
   config: UserConfig,
-) -> Result<(), tauri::Error> {
+) -> Result<&str, tauri::Error> {
   update_user_config_and_state(&app, state, config).ok();
 
-  Ok(())
+  Ok("Success!".into())
 }
 
 #[tauri::command]
@@ -130,16 +130,25 @@ fn set_user_config_path(app_config_state: State<Mutex<AppConfig>>) -> Option<Pat
 }
 
 #[tauri::command]
-async fn run_workflow(state: State<'_, Mutex<UserConfig>>, label: String) -> Result<(), ()> {
+async fn run_workflow(
+  state: State<'_, Mutex<UserConfig>>,
+  name: String,
+  args: HashMap<String, String>,
+) -> Result<(), ()> {
   let workflows = state.lock().expect("Can't unlock").clone().workflows;
+
+  // println!("{:?}", args);
 
   workflows
     .into_iter()
-    .find(|x| x.name == label)
+    .find(|x| x.name == name)
     .expect("Couldn't find workflow")
     .steps
     .par_iter_mut()
-    .for_each(|step| run_step(&step.value));
+    .for_each(|step| {
+      let copy = args.clone();
+      run_step(&step.value, Some(copy))
+    });
 
   Ok(())
 }

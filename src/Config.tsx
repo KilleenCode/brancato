@@ -11,6 +11,7 @@ import {
 
 export type Workflow = {
   name: string;
+  arguments?: string[];
   steps: {
     value: string;
   }[];
