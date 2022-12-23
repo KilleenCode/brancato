@@ -105,6 +105,7 @@ export const Portal = RadixPopover.Portal;
 const IconTriggerButton = styled("button", {
   all: "unset",
   cursor: "pointer",
+  display: "inline-block",
 });
 export const InfoTrigger = () => (
   <Trigger asChild={true}>

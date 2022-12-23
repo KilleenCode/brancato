@@ -32,7 +32,10 @@ const createWorkflowSource = ({
         return {
           ...w,
           label: w.name,
-          description: w.arguments ? "Arguments: " + w.arguments.join(', ') : "",
+          description:
+            w.arguments && w.arguments.length > 0
+              ? "Arguments: " + w.arguments.join(", ")
+              : "",
         };
       });
   },
@@ -46,7 +49,7 @@ const createWorkflowSource = ({
         searchPrefix: item.arguments[0],
         workflow: item,
         onComplete: (args: Record<string, any>) => {
-          console.log('onComplete', args);
+          console.log("onComplete", args);
           setQuery("");
           setContext({ searchPrefix: null });
           handleRunWorkflow(item, args);

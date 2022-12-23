@@ -3,11 +3,17 @@ import { inputSpacing } from "./input";
 
 export const Button = styled("button", inputSpacing, {
   display: "inline-flex",
+  gap: "4px",
   alignItems: "center",
   cursor: "pointer",
   reset: "all",
-  fontWeight: "700",
-  fontSize: "1rem",
+  fontWeight: "500",
+  fontSize: "0.8rem",
+  "&:disabled": {
+    opacity: 0.5,
+    cursor: "default",
+  },
+
   variants: {
     appearance: {
       primary: {
@@ -55,15 +61,35 @@ export const Button = styled("button", inputSpacing, {
         },
       },
     },
+    size: {
+      small: {
+        fontSize: "0.8rem",
+        height: "28px",
+        "& svg": {
+          maxHeight: "20px",
+          maxWidth: "20px",
+        },
+      },
+      medium: {
+        fontSize: "1rem",
+        height: "36px",
+        "& svg": {
+          maxHeight: "20px",
+          maxWidth: "20px",
+        },
+      },
+    },
   },
   defaultVariants: {
     appearance: "primary",
+    size: "medium",
   },
 });
 
 export const ButtonContainer = styled("div", {
   display: "flex",
-  marginTop: "2rem",
+  paddingTop: "0.5rem",
+  paddingBottom: "0.5rem",
   gap: "8px",
   variants: {
     layout: {
@@ -87,10 +113,13 @@ export const ButtonContainer = styled("div", {
       },
     },
     align: {
-      start: {},
-      center: {},
+      start: { justifyContent: "start" },
+      center: { justifyContent: "center" },
       end: { justifyContent: "end" },
     },
+  },
+  defaultVariants: {
+    align: "end",
   },
 });
 export default Button;

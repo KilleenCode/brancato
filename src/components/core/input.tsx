@@ -8,16 +8,27 @@ export const inputSpacing = css({
 });
 
 export const InputContainer = styled("div", {
-  marginBottom: "1rem",
+  paddingTop: "1rem",
+  paddingBottom: "1rem",
 });
 
 export const InputLabel = styled("label", {
   display: "block",
-  fontSize: "1.2rem",
+  fontWeight: "600",
+  fontSize: "0.8rem",
+
+  "&:has(input)": {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+  },
+  "&:not(:has(input))": {
+    paddingBottom: "4px",
+  },
 });
 
 export const Input = styled("input", inputSpacing, {
-  width: '100%',
-  maxWidth: "250px",
-  border: "0",
+  width: "100%",
+  border: "1px solid #ccc",
+  borderRadius: "4px",
 });

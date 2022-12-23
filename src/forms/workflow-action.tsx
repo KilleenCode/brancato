@@ -1,72 +1,68 @@
-import { useFieldArray, UseFieldArrayRemove } from "react-hook-form";
+import { useFieldArray, useFormContext } from "react-hook-form";
 import { invoke } from "@tauri-apps/api";
-import { NestedInputProps } from "./workflow-array";
 import { Input, InputContainer, InputLabel } from "../components/core/input";
 import { styled } from "../theme";
 import Button, { ButtonContainer } from "../components/core/button";
-
+import { DropdownMenuIcon, TrashIcon } from "@radix-ui/react-icons";
 type Props = {
   nestIndex: number;
-  nestedRemove: UseFieldArrayRemove;
-} & NestedInputProps;
+};
 
-const WorkflowAction = ({
-  nestIndex,
-  control,
-  register,
-  nestedRemove,
-  getValues,
-  setValue,
-}: Props) => {
+const WorkflowAction = ({ nestIndex }: Props) => {
+  const { register, getValues, setValue } = useFormContext();
   const { fields, remove, append } = useFieldArray({
-    control,
     name: `workflows.${nestIndex}.steps`,
   });
 
   return (
-    <div>
+    <fieldset style={{ border: "1px solid #ccc" }}>
+      <legend>Steps</legend>
       {fields.map((item, k) => {
         const fieldName = `workflows.${nestIndex}.steps.${k}.value`;
         return (
           <div key={item.id} style={{ marginLeft: 20 }}>
-            <InputContainer>
-              <InputLabel htmlFor={item.id}>Path</InputLabel>
-              <WorkflowActions>
+            <WorkflowActions>
+              <InputContainer>
+                <InputLabel htmlFor={item.id}>Path</InputLabel>
                 <Input
                   id={item.id}
                   {...register(fieldName, {
                     required: true,
+                    minLength: 1,
                   })}
                   style={{ marginRight: "25px" }}
                 />
-                <ButtonContainer
-                  layout="pills"
-                  css={{ display: "inline-flex", marginTop: 0 }}
+              </InputContainer>
+              <ButtonContainer
+                layout="pills"
+                css={{ display: "inline-flex", marginTop: 0 }}
+              >
+                <Button
+                  size="small"
+                  appearance="secondary"
+                  type="button"
+                  onClick={() => {
+                    let value = getValues(fieldName) as string;
+                    let defaultPath =
+                      value && value.length > 0 ? value : undefined;
+                    invoke("select_file", { defaultPath }).then(
+                      (value) => value && setValue(fieldName, value)
+                    );
+                  }}
                 >
-                  <Button
-                    appearance="secondary"
-                    type="button"
-                    onClick={() => {
-                      let value = getValues(fieldName) as string;
-                      let defaultPath =
-                        value && value.length > 0 ? value : undefined;
-                      invoke("select_file", { defaultPath }).then(
-                        (value) => value && setValue(fieldName, value)
-                      );
-                    }}
-                  >
-                    Folder Path
-                  </Button>
-                  <Button
-                    appearance="danger"
-                    type="button"
-                    onClick={() => remove(k)}
-                  >
-                    Delete
-                  </Button>
-                </ButtonContainer>
-              </WorkflowActions>
-            </InputContainer>
+                  <DropdownMenuIcon /> Folder Path
+                </Button>
+                <Button
+                  size="small"
+                  appearance="danger"
+                  type="button"
+                  onClick={() => remove(k)}
+                >
+                  <TrashIcon />
+                  Delete step
+                </Button>
+              </ButtonContainer>
+            </WorkflowActions>
           </div>
         );
       })}
@@ -74,15 +70,8 @@ const WorkflowAction = ({
         <Button type="button" onClick={() => append({ value: "" })}>
           Add Step
         </Button>
-        <Button
-          appearance="danger"
-          type="button"
-          onClick={() => nestedRemove(nestIndex)}
-        >
-          Delete Workflow
-        </Button>
       </ButtonContainer>
-    </div>
+    </fieldset>
   );
 };
 

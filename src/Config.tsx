@@ -24,6 +24,7 @@ export type UserConfig = {
 
 export const defaultWorkflow = {
   name: "",
+  arguments: [],
   steps: [{ value: "" }],
 };
 
