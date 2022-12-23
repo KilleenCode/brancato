@@ -1,7 +1,6 @@
 {
   "package": {
-    "productName": "brancato",
-    "version": "0.11.0"
+    "productName": "brancato"
   },
   "build": {
     "distDir": "../build",
